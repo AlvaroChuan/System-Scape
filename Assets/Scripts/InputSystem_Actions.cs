@@ -46,22 +46,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Look"",
+                    ""name"": ""Decelerate Spaceship"",
                     ""type"": ""Value"",
-                    ""id"": ""6b444451-8a00-4d00-a97e-f47457f736a8"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""id"": ""22951b8b-f081-41cb-b37a-36a2bf5b0cf8"",
+                    ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""Attack"",
-                    ""type"": ""Button"",
-                    ""id"": ""6c2ab1b8-8984-453a-af3d-a3c78ae1679a"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 },
                 {
                     ""name"": ""Jump"",
@@ -71,6 +62,69 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""6c2ab1b8-8984-453a-af3d-a3c78ae1679a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Use Gadget"",
+                    ""type"": ""Button"",
+                    ""id"": ""925bb10f-9874-4b8a-9678-ecd393eecb1b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Next Gadget"",
+                    ""type"": ""Button"",
+                    ""id"": ""08af2d5c-748f-402b-acc5-aa21279b947a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Previous Gadget"",
+                    ""type"": ""Button"",
+                    ""id"": ""05258f9b-8d1a-46a5-a5e1-71a421ddf28a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Open Pad"",
+                    ""type"": ""Button"",
+                    ""id"": ""bbd843e6-7ca6-425e-8bed-a1100f625a08"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""49c4d5be-d02d-40f5-9f86-05e85f949649"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Look"",
+                    ""type"": ""Value"",
+                    ""id"": ""6b444451-8a00-4d00-a97e-f47457f736a8"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -219,34 +273,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8c8e490b-c610-4785-884f-f04217b23ca4"",
-                    ""path"": ""<Pointer>/delta"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse;Touch"",
-                    ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3e5f5442-8668-4b27-a940-df99bad7e831"",
-                    ""path"": ""<Joystick>/{Hatswitch}"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Joystick"",
-                    ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""143bb1cd-cc10-4eca-a2f0-a3664166fe91"",
                     ""path"": ""<Gamepad>/buttonWest"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""Attack"",
+                    ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -257,51 +289,29 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""Attack"",
+                    ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""886e731e-7071-4ae4-95c0-e61739dad6fd"",
-                    ""path"": ""<Touchscreen>/primaryTouch/tap"",
+                    ""id"": ""e25120e0-f0b0-4b11-9fce-3aa1f6ec3df3"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Touch"",
-                    ""action"": ""Attack"",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Use Gadget"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""ee3d0cd2-254e-47a7-a8cb-bc94d9658c54"",
-                    ""path"": ""<Joystick>/trigger"",
+                    ""id"": ""cdd41e83-f17f-4257-8fdc-629f2de3ae91"",
+                    ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Joystick"",
-                    ""action"": ""Attack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""8255d333-5683-4943-a58a-ccb207ff1dce"",
-                    ""path"": ""<XRController>/{PrimaryAction}"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""XR"",
-                    ""action"": ""Attack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b3c1c7f0-bd20-4ee7-a0f1-899b24bca6d7"",
-                    ""path"": ""<Keyboard>/enter"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Attack"",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Use Gadget"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -329,17 +339,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""603f3daf-40bd-4854-8724-93e8017f59e3"",
-                    ""path"": ""<XRController>/secondaryButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""XR"",
-                    ""action"": ""Jump"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""0873e8f4-613f-4064-8314-e44011e08ded"",
                     ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
@@ -357,6 +356,116 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Accelerate Spaceship"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f47c06e1-b918-4b63-aa14-4dfecf45e3bc"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Decelerate Spaceship"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""78166286-ffce-4851-b872-7e1ab6a769ea"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Decelerate Spaceship"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6915b0ee-af7b-4de3-8635-95e95ed7c335"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Next Gadget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f4dd3c2e-35cd-4bb5-81fb-905756c31ad3"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Next Gadget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""064d8475-e2e7-4dfc-89d4-2de27bb039d1"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Previous Gadget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ba833dbc-7703-4ae5-a95e-141084d0bab2"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Previous Gadget"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4ae33b16-c7d2-4917-a85b-72f06ccb487f"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Open Pad"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c2ce6fb1-b60c-4cb7-a5c5-3a43c642be28"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Open Pad"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e9698374-1e67-463c-b352-7f5644dd30be"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a9cb5e0a-26ae-43fb-9032-061d13f891c5"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""Pause"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -946,9 +1055,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_AccelerateSpaceship = m_Player.FindAction("Accelerate Spaceship", throwIfNotFound: true);
-        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
-        m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
+        m_Player_DecelerateSpaceship = m_Player.FindAction("Decelerate Spaceship", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
+        m_Player_UseGadget = m_Player.FindAction("Use Gadget", throwIfNotFound: true);
+        m_Player_NextGadget = m_Player.FindAction("Next Gadget", throwIfNotFound: true);
+        m_Player_PreviousGadget = m_Player.FindAction("Previous Gadget", throwIfNotFound: true);
+        m_Player_OpenPad = m_Player.FindAction("Open Pad", throwIfNotFound: true);
+        m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
+        m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1030,18 +1145,30 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_AccelerateSpaceship;
-    private readonly InputAction m_Player_Look;
-    private readonly InputAction m_Player_Attack;
+    private readonly InputAction m_Player_DecelerateSpaceship;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_Interact;
+    private readonly InputAction m_Player_UseGadget;
+    private readonly InputAction m_Player_NextGadget;
+    private readonly InputAction m_Player_PreviousGadget;
+    private readonly InputAction m_Player_OpenPad;
+    private readonly InputAction m_Player_Pause;
+    private readonly InputAction m_Player_Look;
     public struct PlayerActions
     {
         private @InputSystem_Actions m_Wrapper;
         public PlayerActions(@InputSystem_Actions wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @AccelerateSpaceship => m_Wrapper.m_Player_AccelerateSpaceship;
-        public InputAction @Look => m_Wrapper.m_Player_Look;
-        public InputAction @Attack => m_Wrapper.m_Player_Attack;
+        public InputAction @DecelerateSpaceship => m_Wrapper.m_Player_DecelerateSpaceship;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        public InputAction @Interact => m_Wrapper.m_Player_Interact;
+        public InputAction @UseGadget => m_Wrapper.m_Player_UseGadget;
+        public InputAction @NextGadget => m_Wrapper.m_Player_NextGadget;
+        public InputAction @PreviousGadget => m_Wrapper.m_Player_PreviousGadget;
+        public InputAction @OpenPad => m_Wrapper.m_Player_OpenPad;
+        public InputAction @Pause => m_Wrapper.m_Player_Pause;
+        public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1057,15 +1184,33 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @AccelerateSpaceship.started += instance.OnAccelerateSpaceship;
             @AccelerateSpaceship.performed += instance.OnAccelerateSpaceship;
             @AccelerateSpaceship.canceled += instance.OnAccelerateSpaceship;
-            @Look.started += instance.OnLook;
-            @Look.performed += instance.OnLook;
-            @Look.canceled += instance.OnLook;
-            @Attack.started += instance.OnAttack;
-            @Attack.performed += instance.OnAttack;
-            @Attack.canceled += instance.OnAttack;
+            @DecelerateSpaceship.started += instance.OnDecelerateSpaceship;
+            @DecelerateSpaceship.performed += instance.OnDecelerateSpaceship;
+            @DecelerateSpaceship.canceled += instance.OnDecelerateSpaceship;
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
+            @UseGadget.started += instance.OnUseGadget;
+            @UseGadget.performed += instance.OnUseGadget;
+            @UseGadget.canceled += instance.OnUseGadget;
+            @NextGadget.started += instance.OnNextGadget;
+            @NextGadget.performed += instance.OnNextGadget;
+            @NextGadget.canceled += instance.OnNextGadget;
+            @PreviousGadget.started += instance.OnPreviousGadget;
+            @PreviousGadget.performed += instance.OnPreviousGadget;
+            @PreviousGadget.canceled += instance.OnPreviousGadget;
+            @OpenPad.started += instance.OnOpenPad;
+            @OpenPad.performed += instance.OnOpenPad;
+            @OpenPad.canceled += instance.OnOpenPad;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1076,15 +1221,33 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @AccelerateSpaceship.started -= instance.OnAccelerateSpaceship;
             @AccelerateSpaceship.performed -= instance.OnAccelerateSpaceship;
             @AccelerateSpaceship.canceled -= instance.OnAccelerateSpaceship;
-            @Look.started -= instance.OnLook;
-            @Look.performed -= instance.OnLook;
-            @Look.canceled -= instance.OnLook;
-            @Attack.started -= instance.OnAttack;
-            @Attack.performed -= instance.OnAttack;
-            @Attack.canceled -= instance.OnAttack;
+            @DecelerateSpaceship.started -= instance.OnDecelerateSpaceship;
+            @DecelerateSpaceship.performed -= instance.OnDecelerateSpaceship;
+            @DecelerateSpaceship.canceled -= instance.OnDecelerateSpaceship;
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
+            @UseGadget.started -= instance.OnUseGadget;
+            @UseGadget.performed -= instance.OnUseGadget;
+            @UseGadget.canceled -= instance.OnUseGadget;
+            @NextGadget.started -= instance.OnNextGadget;
+            @NextGadget.performed -= instance.OnNextGadget;
+            @NextGadget.canceled -= instance.OnNextGadget;
+            @PreviousGadget.started -= instance.OnPreviousGadget;
+            @PreviousGadget.performed -= instance.OnPreviousGadget;
+            @PreviousGadget.canceled -= instance.OnPreviousGadget;
+            @OpenPad.started -= instance.OnOpenPad;
+            @OpenPad.performed -= instance.OnOpenPad;
+            @OpenPad.canceled -= instance.OnOpenPad;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1269,9 +1432,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnAccelerateSpaceship(InputAction.CallbackContext context);
-        void OnLook(InputAction.CallbackContext context);
-        void OnAttack(InputAction.CallbackContext context);
+        void OnDecelerateSpaceship(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnInteract(InputAction.CallbackContext context);
+        void OnUseGadget(InputAction.CallbackContext context);
+        void OnNextGadget(InputAction.CallbackContext context);
+        void OnPreviousGadget(InputAction.CallbackContext context);
+        void OnOpenPad(InputAction.CallbackContext context);
+        void OnPause(InputAction.CallbackContext context);
+        void OnLook(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

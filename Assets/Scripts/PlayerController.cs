@@ -5,7 +5,8 @@ public class PlayerController : MonoBehaviour
 {
     // Input system
     private InputSystem_Actions inputActions;
-    private InputActionReference moveAction;
+    private InputAction moveAction;
+    private InputAction lookAction;
     private InputAction accelerateSpaceshipAction;
     private InputAction decelerateSpaceshipAction;
     private InputAction jumpAction;
@@ -17,30 +18,203 @@ public class PlayerController : MonoBehaviour
     private InputAction pauseAction;
     private InputAction zoomAction;
 
+    // Component references
+    private Rigidbody rb;
+    private GameObject playerModel;
+    private CameraController mainCamera;
+
+    // Movement control variables
+    private Vector3 moveDirection;
+    private bool move;
+    private bool canJump = true;
+    private bool usingJectpack = false;
+
+    // Movement parameters
+    [Header("Movement Parameters")]
+    [SerializeField] private float speed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float jetpackForce;
+    [SerializeField] private float rotationSpeed;
+
     private void Awake()
     {
         inputActions = new InputSystem_Actions();
+        rb = GetComponent<Rigidbody>();
+        mainCamera = Camera.main.transform.parent.GetComponent<CameraController>();
+        playerModel = transform.GetChild(0).gameObject;
     }
 
     private void OnEnable()
     {
-        accelerateSpaceshipAction = inputActions.Player.Jump;
+        moveAction = inputActions.Player.Move;
+        moveAction.Enable();
+
+        lookAction = inputActions.Player.Look;
+        lookAction.Enable();
+
+        accelerateSpaceshipAction = inputActions.Player.AccelerateSpaceship;
         accelerateSpaceshipAction.Enable();
-        accelerateSpaceshipAction.performed += OnJump;
+
+        decelerateSpaceshipAction = inputActions.Player.DecelerateSpaceship;
+        decelerateSpaceshipAction.Enable();
+
+        jumpAction = inputActions.Player.Jump;
+        jumpAction.Enable();
+        jumpAction.started += OnJump;
+        jumpAction.canceled += OnEndJump; // To stop jumping when the button is released
+
+        interactAction = inputActions.Player.Interact;
+        interactAction.Enable();
+        interactAction.performed += OnInteract;
+
+        useGadgetAction = inputActions.Player.UseGadget;
+        useGadgetAction.Enable();
+        useGadgetAction.performed += OnUseGadget;
+
+        nextGadgetAction = inputActions.Player.NextGadget;
+        nextGadgetAction.Enable();
+        nextGadgetAction.performed += OnNextGadget;
+
+        previousGadgetAction = inputActions.Player.PreviousGadget;
+        previousGadgetAction.Enable();
+        previousGadgetAction.performed += OnPreviousGadget;
+
+        openPadAction = inputActions.Player.OpenPad;
+        openPadAction.Enable();
+        openPadAction.performed += OnOpenPad;
+
+        pauseAction = inputActions.Player.Pause;
+        pauseAction.Enable();
+        pauseAction.performed += OnPause;
     }
 
     private void OnDisable()
     {
-        if (accelerateSpaceshipAction != null)
+        if (moveAction != null) moveAction.Disable();
+        if (lookAction != null) lookAction.Disable();
+        if (accelerateSpaceshipAction != null) accelerateSpaceshipAction.Disable();
+        if (decelerateSpaceshipAction != null) decelerateSpaceshipAction.Disable();
+
+        if (jumpAction != null)
         {
-            accelerateSpaceshipAction.performed -= OnJump;
-            accelerateSpaceshipAction.Disable();
+            jumpAction.started -= OnJump;
+            jumpAction.canceled -= OnEndJump;
+            jumpAction.Disable();
+        }
+
+        if (interactAction != null)
+        {
+            interactAction.performed -= OnInteract;
+            interactAction.Disable();
+        }
+
+        if (useGadgetAction != null)
+        {
+            useGadgetAction.performed -= OnUseGadget;
+            useGadgetAction.Disable();
+        }
+
+        if (nextGadgetAction != null)
+        {
+            nextGadgetAction.performed -= OnNextGadget;
+            nextGadgetAction.Disable();
+        }
+
+        if (previousGadgetAction != null)
+        {
+            previousGadgetAction.performed -= OnPreviousGadget;
+            previousGadgetAction.Disable();
+        }
+
+        if (openPadAction != null)
+        {
+            openPadAction.performed -= OnOpenPad;
+            openPadAction.Disable();
+        }
+
+        if (pauseAction != null)
+        {
+            pauseAction.performed -= OnPause;
+            pauseAction.Disable();
         }
     }
 
-    private void OnJump(InputAction.CallbackContext context)
+    private void Update()
     {
-        Debug.Log("Accelerate Spaceship Action Triggered");
-        Debug.Log(context.ReadValue<float>());
+        // Movement input
+        Vector2 input = moveAction.ReadValue<Vector2>();
+        Vector3 forward = mainCamera.transform.forward;
+        Vector3 right = mainCamera.transform.right;
+        forward.y = 0;
+        right.y = 0;
+        forward.Normalize();
+        right.Normalize();
+        moveDirection = Vector3.Normalize(forward * input.y + right * input.x);
+        move = moveDirection != Vector3.zero;
+
+        // Look input
+        Vector2 lookInput = lookAction.ReadValue<Vector2>();
+        if (lookInput != Vector2.zero) mainCamera.GetComponent<CameraController>().RotateCamera(lookInput.x);
+
+        // Rotate player model towards movement direction
+        if (move) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), rotationSpeed * Time.deltaTime);
+
+        // Handle jump
+        canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
+    }
+
+    private void FixedUpdate()
+    {
+        Vector3 velocity = rb.linearVelocity;
+        velocity.x = move? moveDirection.x * speed : 0;
+        velocity.z = move? moveDirection.z * speed : 0;
+        rb.linearVelocity = velocity;
+        if (usingJectpack) rb.AddForce(Vector3.up * jetpackForce, ForceMode.Force);
+    }
+
+    private void OnJump(InputAction.CallbackContext context) //TODO
+    {
+        if (canJump) rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        else if (!canJump && true) usingJectpack = true; // Placeholder for jetpack logic
+    }
+
+    private void OnEndJump(InputAction.CallbackContext context) //TODO
+    {
+        usingJectpack = false; // Stop using jetpack when jump is released
+    }
+
+    private void OnInteract(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Interact {context.ReadValue<float>()}");
+    }
+
+    private void OnUseGadget(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Use Gadget {context.ReadValue<float>()}");
+    }
+
+    private void OnNextGadget(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Next Gadget {context.ReadValue<float>()}");
+    }
+
+    private void OnPreviousGadget(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Previous Gadget {context.ReadValue<float>()}");
+    }
+
+    private void OnOpenPad(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Open Pad {context.ReadValue<float>()}");
+    }
+
+    private void OnPause(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Pause {context.ReadValue<float>()}");
+    }
+
+    private void OnZoom(InputAction.CallbackContext context) //TODO
+    {
+        Debug.Log($"Zoom {context.ReadValue<float>()}");
     }
 }
