@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b725c7485988d43800675c35eaf25d, type: 3}
+  m_Name: Ligher Pockets
+  m_EditorClassIdentifier: 
+  upgradeTree: 0
+  upgradeName: 8
+  prerequisites:
+  - {fileID: 11400000, guid: 8e5d8a7010fc2d6418d4a7587a776c92, type: 2}
+  ironCost: 0
+  copperCost: 0
+  magnetiteCost: 0
+  quartzCost: 0
+  phobositeCost: 15
+  radiumCost: 0
+  glaciateCost: 0
+  bismuthCost: 15
+  platinumCost: 0
+  petralactCost: 0

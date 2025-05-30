@@ -8,8 +8,9 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Vector3 cameraOffset;
     [SerializeField] private float cameraFollowSpeed;
     [SerializeField] private float cameraRotationSpeed;
-    [SerializeField] private float cameraRotation;
-
+    [SerializeField] private float minZoom;
+    [SerializeField] private float maxZoom;
+    private float cameraRotation;
     private RaycastHit hit;
     private Vector3 wishedCameraPosition;
     private Camera mainCamera;
@@ -21,7 +22,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-            if (player == null) return;
+        if (player == null) return;
 
         // Position lerp
         transform.position = Vector3.Lerp(transform.position, player.position, cameraFollowSpeed * Time.deltaTime);
@@ -38,11 +39,18 @@ public class CameraController : MonoBehaviour
         wishedCameraPosition = player.position + desiredOffset;
         if (Physics.Raycast(player.position, desiredOffset.normalized, out hit, desiredOffset.magnitude)) wishedCameraPosition = hit.point - desiredOffset.normalized * 0.1f;
         mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, wishedCameraPosition, cameraFollowSpeed * 10 * Time.deltaTime);
-        mainCamera.transform.rotation = Quaternion.Slerp(mainCamera.transform.rotation, Quaternion.LookRotation((player.position + new Vector3(0, 0.5f, 1)) - mainCamera.transform.position, transform.up),cameraRotationSpeed * Time.deltaTime);
+        mainCamera.transform.rotation = Quaternion.Slerp(mainCamera.transform.rotation, Quaternion.LookRotation((player.position + new Vector3(0, 0.5f, 0)) - mainCamera.transform.position, transform.up), cameraRotationSpeed * Time.deltaTime);
     }
 
     public void RotateCamera(float rotation)
     {
         cameraRotation += rotation;
+    }
+
+    public void ZoomCamera(float zoomAmount)
+    {
+        float currentZoom = cameraOffset.magnitude;
+        currentZoom = Mathf.Clamp(currentZoom - zoomAmount, minZoom, maxZoom);
+        cameraOffset = cameraOffset.normalized * currentZoom;
     }
 }

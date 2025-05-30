@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b725c7485988d43800675c35eaf25d, type: 3}
+  m_Name: Enemy Buffet
+  m_EditorClassIdentifier: 
+  upgradeTree: 0
+  upgradeName: 14
+  prerequisites:
+  - {fileID: 11400000, guid: ebcc21f1cf3c53d4585cfc5c9b86d0ef, type: 2}
+  - {fileID: 11400000, guid: a33ecdde77af78344a52228c9925c6ca, type: 2}
+  ironCost: 0
+  copperCost: 0
+  magnetiteCost: 0
+  quartzCost: 0
+  phobositeCost: 0
+  radiumCost: 0
+  glaciateCost: 0
+  bismuthCost: 0
+  platinumCost: 20
+  petralactCost: 15

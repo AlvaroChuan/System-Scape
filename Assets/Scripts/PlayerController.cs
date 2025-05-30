@@ -86,6 +86,9 @@ public class PlayerController : MonoBehaviour
         pauseAction = inputActions.Player.Pause;
         pauseAction.Enable();
         pauseAction.performed += OnPause;
+
+        zoomAction = inputActions.Player.ZoomInOut;
+        zoomAction.Enable();
     }
 
     private void OnDisable()
@@ -137,6 +140,8 @@ public class PlayerController : MonoBehaviour
             pauseAction.performed -= OnPause;
             pauseAction.Disable();
         }
+
+        if (zoomAction != null) zoomAction.Disable();
     }
 
     private void Update()
@@ -154,7 +159,8 @@ public class PlayerController : MonoBehaviour
 
         // Look input
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
-        if (lookInput != Vector2.zero) mainCamera.GetComponent<CameraController>().RotateCamera(lookInput.x);
+        if (lookInput != Vector2.zero) mainCamera.RotateCamera(lookInput.x);
+        if (zoomAction.ReadValue<float>() != 0) mainCamera.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
 
         // Rotate player model towards movement direction
         if (move) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), rotationSpeed * Time.deltaTime);
@@ -178,7 +184,7 @@ public class PlayerController : MonoBehaviour
         else if (!canJump && true) usingJectpack = true; // Placeholder for jetpack logic
     }
 
-    private void OnEndJump(InputAction.CallbackContext context) //TODO
+    private void OnEndJump(InputAction.CallbackContext context)
     {
         usingJectpack = false; // Stop using jetpack when jump is released
     }
@@ -211,10 +217,5 @@ public class PlayerController : MonoBehaviour
     private void OnPause(InputAction.CallbackContext context) //TODO
     {
         Debug.Log($"Pause {context.ReadValue<float>()}");
-    }
-
-    private void OnZoom(InputAction.CallbackContext context) //TODO
-    {
-        Debug.Log($"Zoom {context.ReadValue<float>()}");
     }
 }
