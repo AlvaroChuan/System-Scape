@@ -29,13 +29,6 @@ public class PlayerController : MonoBehaviour
     private bool canJump = true;
     private bool usingJectpack = false;
 
-    // Movement parameters
-    [Header("Movement Parameters")]
-    [SerializeField] private float speed;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float jetpackForce;
-    [SerializeField] private float rotationSpeed;
-
     private void Awake()
     {
         inputActions = new InputSystem_Actions();
@@ -163,7 +156,7 @@ public class PlayerController : MonoBehaviour
         if (zoomAction.ReadValue<float>() != 0) mainCamera.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
 
         // Rotate player model towards movement direction
-        if (move) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), rotationSpeed * Time.deltaTime);
+        if (move) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), GameManager.instance.RotationSpeed * Time.deltaTime);
 
         // Handle jump
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
@@ -172,15 +165,15 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = move? moveDirection.x * speed : 0;
-        velocity.z = move? moveDirection.z * speed : 0;
+        velocity.x = move? moveDirection.x * GameManager.instance.PlayerSpeed : 0;
+        velocity.z = move? moveDirection.z * GameManager.instance.PlayerSpeed : 0;
         rb.linearVelocity = velocity;
-        if (usingJectpack) rb.AddForce(Vector3.up * jetpackForce, ForceMode.Force);
+        if (usingJectpack) rb.AddForce(Vector3.up * GameManager.instance.JetpackForce, ForceMode.Force);
     }
 
     private void OnJump(InputAction.CallbackContext context) //TODO
     {
-        if (canJump) rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
         else if (!canJump && true) usingJectpack = true; // Placeholder for jetpack logic
     }
 
@@ -197,6 +190,7 @@ public class PlayerController : MonoBehaviour
     private void OnUseGadget(InputAction.CallbackContext context) //TODO
     {
         Debug.Log($"Use Gadget {context.ReadValue<float>()}");
+        GameManager.instance.DamagePlayer(10);
     }
 
     private void OnNextGadget(InputAction.CallbackContext context) //TODO

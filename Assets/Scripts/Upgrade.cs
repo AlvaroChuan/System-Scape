@@ -3,13 +3,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Upgrade", menuName = "Upgrade")]
 public class Upgrade : ScriptableObject
 {
-    private enum UpgradeTree
+    public enum UpgradeTree
     {
         EQUIPMENT,
         GADGETS,
         SPACESHIP
     }
-    private enum UpgradeName
+    public enum UpgradeName
     {
         // Oxygen system
         BIGGER_TANKS,
@@ -78,21 +78,22 @@ public class Upgrade : ScriptableObject
         FLIGHT_COMPANION
     }
     [Header("Upgrade Details")]
-    [SerializeField] private UpgradeTree upgradeTree;
-    [SerializeField] private UpgradeName upgradeName;
-    [SerializeField] private Upgrade[] prerequisites;
+    [SerializeField] public UpgradeTree upgradeTree;
+    [SerializeField] public UpgradeName upgradeName;
+    [SerializeField] public Upgrade[] prerequisites;
     [Header("Upgrade Costs")]
-    [SerializeField] private int ironCost;
-    [SerializeField] private int copperCost;
-    [SerializeField] private int magnetiteCost;
-    [SerializeField] private int quartzCost;
-    [SerializeField] private int phobositeCost;
-    [SerializeField] private int radiumCost;
-    [SerializeField] private int glaciateCost;
-    [SerializeField] private int bismuthCost;
-    [SerializeField] private int platinumCost;
-    [SerializeField] private int petralactCost;
+    [SerializeField] public int ironCost;
+    [SerializeField] public int copperCost;
+    [SerializeField] public int magnetiteCost;
+    [SerializeField] public int quartzCost;
+    [SerializeField] public int phobositeCost;
+    [SerializeField] public int radiumCost;
+    [SerializeField] public int glaciateCost;
+    [SerializeField] public int bismuthCost;
+    [SerializeField] public int platinumCost;
+    [SerializeField] public int petralactCost;
     private bool active = false;
     public bool IsActive => active;
     public void Activate() { active = true; }
+    public void Deactivate() { active = false; }
 }
