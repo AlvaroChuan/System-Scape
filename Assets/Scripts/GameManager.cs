@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
 
     // Gadgets value
     private int selectedGadget = 0;
-    public int SelectedGadget => selectedGadget;
+    public int SelectedGadget => selectedGadget; // 0 = Drill, 1 = Sword, 2 = Gun
     private float swordDamage = 10f;
     private float bulletDamage = 2.5f;
     private int bulletsPerBurst = 3;
@@ -186,6 +186,14 @@ public class GameManager : MonoBehaviour
         Debug.Log("Run ended. Player stats and upgrades will be reset.");
         StopAllCoroutines();
     }
+
+    public void SwitchGadget(bool forward)
+    {
+        selectedGadget += forward ? 1 : -1;
+        if (selectedGadget < 0) selectedGadget = 2;
+        else if (selectedGadget > 2) selectedGadget = 0;
+    }
+
     public int ApplyUpgrade(Upgrade upgrade) // Returns 0 if successful, 1 if already active, 2 if prerequisites not met, 3 if not enough resources
     {
         if (upgrade.IsActive) return 1;

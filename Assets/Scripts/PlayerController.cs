@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +12,6 @@ public class PlayerController : MonoBehaviour
     private InputAction decelerateSpaceshipAction;
     private InputAction jumpAction;
     private InputAction interactAction;
-    private InputAction useGadgetAction;
     private InputAction nextGadgetAction;
     private InputAction previousGadgetAction;
     private InputAction openPadAction;
@@ -20,21 +20,33 @@ public class PlayerController : MonoBehaviour
 
     // Component references
     private Rigidbody rb;
-    private GameObject playerModel;
-    private CameraController mainCamera;
+    private CameraController cameraController;
+    private Camera mainCamera;
+    [SerializeField] private GameObject playerModel;
+    [SerializeField] private GameObject pad;
 
     // Movement control variables
     private Vector3 moveDirection;
     private bool move;
+    private bool canMove = true;
     private bool canJump = true;
     private bool usingJectpack = false;
+
+    // Usage control variables
+    private bool usingDrill = false;
+    private bool usingPad = false;
+    private Vector3 padOriginalPosition;
+    private Vector3 padOriginalRotation;
+    private Coroutine padCoroutine;
 
     private void Awake()
     {
         inputActions = new InputSystem_Actions();
         rb = GetComponent<Rigidbody>();
-        mainCamera = Camera.main.transform.parent.GetComponent<CameraController>();
-        playerModel = transform.GetChild(0).gameObject;
+        cameraController = Camera.main.transform.parent.GetComponent<CameraController>();
+        mainCamera = Camera.main;
+        padOriginalPosition = pad.transform.localPosition;
+        padOriginalRotation = pad.transform.localRotation.eulerAngles;
     }
 
     private void OnEnable()
@@ -54,15 +66,12 @@ public class PlayerController : MonoBehaviour
         jumpAction = inputActions.Player.Jump;
         jumpAction.Enable();
         jumpAction.started += OnJump;
-        jumpAction.canceled += OnEndJump; // To stop jumping when the button is released
+        jumpAction.canceled += OnEndJump;
 
         interactAction = inputActions.Player.Interact;
         interactAction.Enable();
-        interactAction.performed += OnInteract;
-
-        useGadgetAction = inputActions.Player.UseGadget;
-        useGadgetAction.Enable();
-        useGadgetAction.performed += OnUseGadget;
+        interactAction.started += OnInteract;
+        interactAction.canceled += OnEndInteract;
 
         nextGadgetAction = inputActions.Player.NextGadget;
         nextGadgetAction.Enable();
@@ -100,14 +109,9 @@ public class PlayerController : MonoBehaviour
 
         if (interactAction != null)
         {
-            interactAction.performed -= OnInteract;
+            interactAction.started -= OnInteract;
+            interactAction.canceled -= OnInteract;
             interactAction.Disable();
-        }
-
-        if (useGadgetAction != null)
-        {
-            useGadgetAction.performed -= OnUseGadget;
-            useGadgetAction.Disable();
         }
 
         if (nextGadgetAction != null)
@@ -141,8 +145,8 @@ public class PlayerController : MonoBehaviour
     {
         // Movement input
         Vector2 input = moveAction.ReadValue<Vector2>();
-        Vector3 forward = mainCamera.transform.forward;
-        Vector3 right = mainCamera.transform.right;
+        Vector3 forward = cameraController.transform.forward;
+        Vector3 right = cameraController.transform.right;
         forward.y = 0;
         right.y = 0;
         forward.Normalize();
@@ -152,11 +156,11 @@ public class PlayerController : MonoBehaviour
 
         // Look input
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
-        if (lookInput != Vector2.zero) mainCamera.RotateCamera(lookInput.x);
-        if (zoomAction.ReadValue<float>() != 0) mainCamera.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
+        if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
+        if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
 
         // Rotate player model towards movement direction
-        if (move) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), GameManager.instance.RotationSpeed * Time.deltaTime);
+        if (move && canMove) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), GameManager.instance.RotationSpeed * Time.deltaTime);
 
         // Handle jump
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
@@ -164,17 +168,22 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!canMove)
+        {
+            rb.linearVelocity = Vector3.zero;
+            return;
+        }
         Vector3 velocity = rb.linearVelocity;
-        velocity.x = move? moveDirection.x * GameManager.instance.PlayerSpeed : 0;
-        velocity.z = move? moveDirection.z * GameManager.instance.PlayerSpeed : 0;
+        velocity.x = move ? moveDirection.x * GameManager.instance.PlayerSpeed : 0;
+        velocity.z = move ? moveDirection.z * GameManager.instance.PlayerSpeed : 0;
         rb.linearVelocity = velocity;
         if (usingJectpack) rb.AddForce(Vector3.up * GameManager.instance.JetpackForce, ForceMode.Force);
     }
 
-    private void OnJump(InputAction.CallbackContext context) //TODO
+    private void OnJump(InputAction.CallbackContext context)
     {
         if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
-        else if (!canJump && true) usingJectpack = true; // Placeholder for jetpack logic
+        else if (!canJump && GameManager.instance.JetpackEnabled) usingJectpack = true;
     }
 
     private void OnEndJump(InputAction.CallbackContext context)
@@ -184,32 +193,81 @@ public class PlayerController : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context) //TODO
     {
-        Debug.Log($"Interact {context.ReadValue<float>()}");
+        switch (GameManager.instance.SelectedGadget)
+        {
+            case 0:
+                if (GameManager.instance.drillableMaterials.Count <= 0) return;
+                usingDrill = true;
+                GameManager.instance.drillableMaterials[0].DrillMaterial();
+                break;
+        }
     }
 
-    private void OnUseGadget(InputAction.CallbackContext context) //TODO
+    private void OnEndInteract(InputAction.CallbackContext context) //TODO
     {
-        Debug.Log($"Use Gadget {context.ReadValue<float>()}");
-        GameManager.instance.DamagePlayer(10);
+        switch (GameManager.instance.SelectedGadget)
+        {
+            case 0:
+                usingDrill = false;
+                if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
+                break;
+        }
     }
 
-    private void OnNextGadget(InputAction.CallbackContext context) //TODO
+    private void OnNextGadget(InputAction.CallbackContext context)
     {
-        Debug.Log($"Next Gadget {context.ReadValue<float>()}");
+        if (usingDrill) GameManager.instance.drillableMaterials[0].StopDrilling();
+        usingDrill = false;
+        GameManager.instance.SwitchGadget(true);
     }
 
-    private void OnPreviousGadget(InputAction.CallbackContext context) //TODO
+    private void OnPreviousGadget(InputAction.CallbackContext context)
     {
-        Debug.Log($"Previous Gadget {context.ReadValue<float>()}");
+        if (usingDrill) GameManager.instance.drillableMaterials[0].StopDrilling();
+        usingDrill = false;
+        GameManager.instance.SwitchGadget(false);
     }
 
     private void OnOpenPad(InputAction.CallbackContext context) //TODO
     {
-        Debug.Log($"Open Pad {context.ReadValue<float>()}");
+        usingPad = !usingPad;
+        canMove = !canMove;
+        if (padCoroutine != null) StopCoroutine(padCoroutine);
+        padCoroutine = StartCoroutine(MovePadToTarget(usingPad));
     }
 
     private void OnPause(InputAction.CallbackContext context) //TODO
     {
         Debug.Log($"Pause {context.ReadValue<float>()}");
+    }
+
+    private IEnumerator MovePadToTarget(bool toCamera)
+    {
+        if (toCamera)
+        {
+            while (Vector3.Distance(pad.transform.position, mainCamera.transform.position + mainCamera.transform.forward * 0.5f) > 0.01f
+                   || Quaternion.Angle(pad.transform.rotation, Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up)) > 1f)
+            {
+                pad.transform.position = Vector3.Lerp(pad.transform.position, mainCamera.transform.position + mainCamera.transform.forward * 0.5f, 10 * Time.deltaTime);
+                pad.transform.rotation = Quaternion.Slerp(pad.transform.rotation, Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up), 10 * Time.deltaTime);
+                yield return null;
+            }
+            pad.transform.position = mainCamera.transform.position + mainCamera.transform.forward * 0.5f;
+            pad.transform.rotation = Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up);
+            Time.timeScale = 0;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            while (Vector3.Distance(pad.transform.localPosition, padOriginalPosition) > 0.01f
+                   || Quaternion.Angle(pad.transform.localRotation, Quaternion.Euler(padOriginalRotation)) > 1f)
+            {
+                pad.transform.localPosition = Vector3.Lerp(pad.transform.localPosition, padOriginalPosition, 10 * Time.deltaTime);
+                pad.transform.localRotation = Quaternion.Slerp(pad.transform.localRotation, Quaternion.Euler(padOriginalRotation), 10 * Time.deltaTime);
+                yield return null;
+            }
+            pad.transform.localPosition = padOriginalPosition;
+            pad.transform.localRotation = Quaternion.Euler(padOriginalRotation);
+        }
     }
 }

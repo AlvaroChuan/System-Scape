@@ -35,6 +35,7 @@ public class Material : MonoBehaviour
             yield return null;
         }
         GameManager.instance.AddMaterial(materialName);
+        GameManager.instance.drillableMaterials.Remove(this);
         Destroy(gameObject);
     }
 }
