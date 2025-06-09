@@ -47,25 +47,25 @@ public class GameManager : MonoBehaviour
     // Materials
     private int maxAmmountPerMaterial = 30;
     public List<Material> drillableMaterials = new List<Material>();
-    private int iron = 0;
+    private int iron = 1000000;
     public int Iron => iron;
-    private int copper = 0;
+    private int copper = 1000000;
     public int Copper => copper;
-    private int magnetite = 0;
+    private int magnetite = 1000000;
     public int Magnetite => magnetite;
-    private int quartz = 0;
+    private int quartz = 1000000;
     public int Quartz => quartz;
-    private int phobosite = 0;
+    private int phobosite = 1000000;
     public int Phobosite => phobosite;
-    private int radium = 0;
+    private int radium = 1000000;
     public int Radium => radium;
-    private int glaciate = 0;
+    private int glaciate = 1000000;
     public int Glaciate => glaciate;
-    private int bismuth = 0;
+    private int bismuth = 1000000;
     public int Bismuth => bismuth;
-    private int platinum = 0;
+    private int platinum = 1000000;
     public int Platinum => platinum;
-    private int petralact = 0;
+    private int petralact = 1000000;
     public int Petralact => petralact;
 
     // Spaceship
@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
     public bool FlightCompanionEnabled => flightCompanionEnabled;
 
     // Upgrades
-    public Upgrade[] upgrades; // List of all available upgrades
+    public List<Upgrade> upgrades; // List of all available upgrades
 
     // Coroutines
     private Coroutine healthRegenCoroutine;
@@ -111,7 +111,7 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            PrepareRun();
+            //PrepareRun();
         }
         else Destroy(gameObject);
     }
@@ -372,6 +372,7 @@ public class GameManager : MonoBehaviour
                 flightCompanionEnabled = true;
                 break;
         }
+        upgrade.Activate();
         return 0;
     }
 

@@ -254,11 +254,13 @@ public class PlayerController : MonoBehaviour
             }
             pad.transform.position = mainCamera.transform.position + mainCamera.transform.forward * 0.5f;
             pad.transform.rotation = Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up);
+            HUDManager.instance.TogglePadUI(true);
             Time.timeScale = 0;
         }
         else
         {
             Time.timeScale = 1;
+            HUDManager.instance.TogglePadUI(false);
             while (Vector3.Distance(pad.transform.localPosition, padOriginalPosition) > 0.01f
                    || Quaternion.Angle(pad.transform.localRotation, Quaternion.Euler(padOriginalRotation)) > 1f)
             {
