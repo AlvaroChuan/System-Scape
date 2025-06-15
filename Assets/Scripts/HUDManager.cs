@@ -3,8 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
-using UnityEngine.Analytics;
-using Unity.VisualScripting;
 
 public class HUDManager : MonoBehaviour
 {
@@ -21,8 +19,11 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private GameObject equipmentPanel;
     [SerializeField] private GameObject spaceshipPanel;
     [SerializeField] private GameObject gadgetsPanel;
+    [SerializeField] private Image selectionRect;
+    [SerializeField] private UnityEngine.Material crtMaterial;
     private GameObject currentPanel;
     private int currentSubPanelIndex = 0;
+    private bool onUI = false;
 
     private void Awake()
     {
@@ -39,11 +40,32 @@ public class HUDManager : MonoBehaviour
     {
         oxygenText.text = $"Oxygen: {GameManager.instance.OxygenLevel:F1} / {GameManager.instance.MaxOxygen:F1}";
         healthText.text = $"Health: {GameManager.instance.CurrentHP:F1} / {GameManager.instance.MaxHP:F1}";
+        if (onUI && EventSystem.current.currentSelectedGameObject != null)
+        {
+            if (EventSystem.current.currentSelectedGameObject.transform.parent != null && EventSystem.current.currentSelectedGameObject.name == "Button")
+            {
+                selectionRect.rectTransform.anchorMin = EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>().anchorMin;
+                selectionRect.rectTransform.anchorMax = EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>().anchorMax;
+                selectionRect.rectTransform.pivot = EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>().pivot;
+                selectionRect.rectTransform.position = Vector3.Lerp(selectionRect.rectTransform.position, EventSystem.current.currentSelectedGameObject.transform.parent.position, Time.fixedDeltaTime * 10f);
+                selectionRect.rectTransform.sizeDelta = Vector3.Lerp(selectionRect.rectTransform.sizeDelta, EventSystem.current.currentSelectedGameObject.transform.parent.GetComponent<RectTransform>().sizeDelta, Time.fixedDeltaTime * 10f);
+            }
+            else
+            {
+                selectionRect.rectTransform.anchorMin = EventSystem.current.currentSelectedGameObject.GetComponent<RectTransform>().anchorMin;
+                selectionRect.rectTransform.anchorMax = EventSystem.current.currentSelectedGameObject.GetComponent<RectTransform>().anchorMax;
+                selectionRect.rectTransform.pivot = EventSystem.current.currentSelectedGameObject.GetComponent<RectTransform>().pivot;
+                selectionRect.rectTransform.position = Vector3.Lerp(selectionRect.rectTransform.position, EventSystem.current.currentSelectedGameObject.transform.position, Time.fixedDeltaTime * 10f);
+                selectionRect.rectTransform.sizeDelta = Vector3.Lerp(selectionRect.rectTransform.sizeDelta, EventSystem.current.currentSelectedGameObject.GetComponent<RectTransform>().sizeDelta, Time.fixedDeltaTime * 10f);
+            }
+        }
+        crtMaterial.SetFloat("_CustomTime", Time.fixedDeltaTime);
     }
 
     public void TogglePadUI(bool state)
     {
         padUI.SetActive(state);
+        onUI = state;
     }
 
     public void TogglePanel(GameObject panel)
@@ -101,6 +123,8 @@ public class HUDManager : MonoBehaviour
         GameObject mask = EventSystem.current.currentSelectedGameObject.transform.parent.GetChild(1).gameObject;
         int result = GameManager.instance.ApplyUpgrade(upgrade);
         if (result == 0) mask.SetActive(false);
-        else Debug.Log("Not enough resources to buy upgrade: " + upgrade.upgradeName); //TODO
+        else if (result == 1) Debug.Log("Upgrade already purchased: " + upgrade.upgradeName);
+        else if (result == 2) Debug.Log("Prerequisites not met");
+        else if (result == 3) Debug.Log("Not enough resources to purchase upgrade: " + upgrade.upgradeName);
     }
 }

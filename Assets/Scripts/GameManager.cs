@@ -47,25 +47,25 @@ public class GameManager : MonoBehaviour
     // Materials
     private int maxAmmountPerMaterial = 30;
     public List<Material> drillableMaterials = new List<Material>();
-    private int iron = 1000000;
+    private int iron = 0;
     public int Iron => iron;
-    private int copper = 1000000;
+    private int copper = 0;
     public int Copper => copper;
-    private int magnetite = 1000000;
+    private int magnetite = 0;
     public int Magnetite => magnetite;
-    private int quartz = 1000000;
+    private int quartz = 0;
     public int Quartz => quartz;
-    private int phobosite = 1000000;
+    private int phobosite = 0;
     public int Phobosite => phobosite;
-    private int radium = 1000000;
+    private int radium = 0;
     public int Radium => radium;
-    private int glaciate = 1000000;
+    private int glaciate = 0;
     public int Glaciate => glaciate;
-    private int bismuth = 1000000;
+    private int bismuth = 0;
     public int Bismuth => bismuth;
-    private int platinum = 1000000;
+    private int platinum = 0;
     public int Platinum => platinum;
-    private int petralact = 1000000;
+    private int petralact = 0;
     public int Petralact => petralact;
 
     // Spaceship
@@ -111,7 +111,7 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            //PrepareRun();
+            PrepareRun();
         }
         else Destroy(gameObject);
     }
@@ -147,16 +147,16 @@ public class GameManager : MonoBehaviour
         damageReduction = 0f;
         reflectionChance = 0f;
 
-        iron = 0;
-        copper = 0;
-        magnetite = 0;
-        quartz = 0;
-        phobosite = 0;
-        radium = 0;
-        glaciate = 0;
-        bismuth = 0;
-        platinum = 0;
-        petralact = 0;
+        iron = 10000;
+        copper = 10000;
+        magnetite = 10000;
+        quartz = 10000;
+        phobosite = 10000;
+        radium = 10000;
+        glaciate = 10000;
+        bismuth = 10000;
+        platinum = 10000;
+        petralact = 10000;
 
         maxSpaceshipSpeed = 10f;
         spaceShipAcceleration = 5f;
