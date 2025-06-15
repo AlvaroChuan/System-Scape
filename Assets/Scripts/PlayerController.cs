@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -24,12 +26,15 @@ public class PlayerController : MonoBehaviour
     private Camera mainCamera;
     [SerializeField] private GameObject playerModel;
     [SerializeField] private GameObject pad;
+    [SerializeField] private SphereCollider drillRangeCollider;
+    [SerializeField] private SphereCollider rifleRangeCollider;
 
     // Movement control variables
     private Vector3 moveDirection;
     private bool move;
     private bool canMove = true;
     private bool canJump = true;
+    private bool canAttack = true;
     private bool usingJectpack = false;
 
     // Usage control variables
@@ -38,6 +43,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 padOriginalPosition;
     private Vector3 padOriginalRotation;
     private Coroutine padCoroutine;
+    private bool lockOnTarget = false;
+    private Enemy target;
 
     private void Awake()
     {
@@ -47,6 +54,8 @@ public class PlayerController : MonoBehaviour
         mainCamera = Camera.main;
         padOriginalPosition = pad.transform.localPosition;
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
+        if (drillRangeCollider.radius != GameManager.instance.DrillDistance) drillRangeCollider.radius = GameManager.instance.DrillDistance;
+        if (rifleRangeCollider.radius != GameManager.instance.AimRangeRifle) rifleRangeCollider.radius = GameManager.instance.AimRangeRifle;
     }
 
     private void OnEnable()
@@ -155,12 +164,20 @@ public class PlayerController : MonoBehaviour
         move = moveDirection != Vector3.zero;
 
         // Look input
+        if(usingPad) return;
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
         if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
 
         // Rotate player model towards movement direction
-        if (move && canMove) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), GameManager.instance.RotationSpeed * Time.deltaTime);
+        if (!lockOnTarget)
+        {
+            if (move && canMove) playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, Quaternion.LookRotation(moveDirection), GameManager.instance.RotationSpeed * Time.deltaTime);
+        }
+        else if (target != null)
+        {
+            playerModel.transform.rotation = Quaternion.LookRotation(new Vector3(target.transform.position.x, 0, target.transform.position.z) - new Vector3(transform.position.x, 0, transform.position.z));
+        }
 
         // Handle jump
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
@@ -182,28 +199,37 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
+        if(usingPad) return;
         if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
         else if (!canJump && GameManager.instance.JetpackEnabled) usingJectpack = true;
     }
 
     private void OnEndJump(InputAction.CallbackContext context)
     {
+        if(usingPad) return;
         usingJectpack = false; // Stop using jetpack when jump is released
     }
 
-    private void OnInteract(InputAction.CallbackContext context) //TODO
+    private void OnInteract(InputAction.CallbackContext context)
     {
         switch (GameManager.instance.SelectedGadget)
         {
             case 0:
+                if (drillRangeCollider.radius != GameManager.instance.DrillDistance) drillRangeCollider.radius = GameManager.instance.DrillDistance;
                 if (GameManager.instance.drillableMaterials.Count <= 0) return;
                 usingDrill = true;
                 GameManager.instance.drillableMaterials[0].DrillMaterial();
                 break;
+            case 1:
+                if(canAttack) Slice();
+                break;
+            case 2:
+                if(canAttack) StartCoroutine(Shoot());
+                break;
         }
     }
 
-    private void OnEndInteract(InputAction.CallbackContext context) //TODO
+    private void OnEndInteract(InputAction.CallbackContext context)
     {
         switch (GameManager.instance.SelectedGadget)
         {
@@ -216,16 +242,22 @@ public class PlayerController : MonoBehaviour
 
     private void OnNextGadget(InputAction.CallbackContext context)
     {
+        if (usingPad) return;
         if (usingDrill) GameManager.instance.drillableMaterials[0].StopDrilling();
         usingDrill = false;
         GameManager.instance.SwitchGadget(true);
+        if (drillRangeCollider.radius != GameManager.instance.DrillDistance) drillRangeCollider.radius = GameManager.instance.DrillDistance;
+        if (rifleRangeCollider.radius != GameManager.instance.AimRangeRifle) rifleRangeCollider.radius = GameManager.instance.AimRangeRifle;
     }
 
     private void OnPreviousGadget(InputAction.CallbackContext context)
     {
+        if (usingPad) return;
         if (usingDrill) GameManager.instance.drillableMaterials[0].StopDrilling();
         usingDrill = false;
         GameManager.instance.SwitchGadget(false);
+        if (drillRangeCollider.radius != GameManager.instance.DrillDistance) drillRangeCollider.radius = GameManager.instance.DrillDistance;
+        if (rifleRangeCollider.radius != GameManager.instance.AimRangeRifle) rifleRangeCollider.radius = GameManager.instance.AimRangeRifle;
     }
 
     private void OnOpenPad(InputAction.CallbackContext context) //TODO
@@ -233,15 +265,54 @@ public class PlayerController : MonoBehaviour
         usingPad = !usingPad;
         canMove = !canMove;
         if (padCoroutine != null) StopCoroutine(padCoroutine);
-        padCoroutine = StartCoroutine(MovePadToTarget(usingPad));
+        padCoroutine = StartCoroutine(MovePadToTarget(usingPad, "Upgrades"));
     }
 
     private void OnPause(InputAction.CallbackContext context) //TODO
     {
-        Debug.Log($"Pause {context.ReadValue<float>()}");
+        usingPad = !usingPad;
+        canMove = !canMove;
+        if (padCoroutine != null) StopCoroutine(padCoroutine);
+        padCoroutine = StartCoroutine(MovePadToTarget(usingPad, "Pause"));
     }
 
-    private IEnumerator MovePadToTarget(bool toCamera)
+    private void Slice()
+    {
+        canAttack = false;
+        List<Enemy> enemiesInRange = GameManager.instance.enemiesInMaxRange;
+        if (enemiesInRange.Count <= 0) return;
+        enemiesInRange.OrderBy(e => Vector3.Distance(transform.position, e.transform.position));
+        target = enemiesInRange[0];
+        lockOnTarget = true;
+        if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimSwordRange) target.TakeDamage(GameManager.instance.SwordDamage);
+        lockOnTarget = false;
+        StartCoroutine(AttackCooldown());
+    }
+
+    private IEnumerator Shoot()
+    {
+        canAttack = false;
+        List<Enemy> enemiesInRange = GameManager.instance.enemiesInMaxRange;
+        if (enemiesInRange.Count <= 0) yield break;
+        enemiesInRange.OrderBy(e => Vector3.Distance(transform.position, e.transform.position));
+        target = enemiesInRange[0];
+        lockOnTarget = true;
+        for (int i = 0; i < GameManager.instance.BulletsPerBurst; i++)
+        {
+            if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.TakeDamage(GameManager.instance.BulletDamage);
+            yield return new WaitForSeconds(0.1f);
+        }
+        lockOnTarget = false;
+        StartCoroutine(AttackCooldown());
+    }
+
+    private IEnumerator AttackCooldown()
+    {
+        yield return new WaitForSeconds(1f);
+        canAttack = true;
+    }
+
+    private IEnumerator MovePadToTarget(bool toCamera, string menu)
     {
         if (toCamera)
         {
@@ -254,13 +325,13 @@ public class PlayerController : MonoBehaviour
             }
             pad.transform.position = mainCamera.transform.position + mainCamera.transform.forward * 0.5f;
             pad.transform.rotation = Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up);
-            HUDManager.instance.TogglePadUI(true);
+            HUDManager.instance.ToggleHUD(true, menu);
             Time.timeScale = 0;
         }
         else
         {
             Time.timeScale = 1;
-            HUDManager.instance.TogglePadUI(false);
+            HUDManager.instance.ToggleHUD(false, menu);
             while (Vector3.Distance(pad.transform.localPosition, padOriginalPosition) > 0.01f
                    || Quaternion.Angle(pad.transform.localRotation, Quaternion.Euler(padOriginalRotation)) > 1f)
             {

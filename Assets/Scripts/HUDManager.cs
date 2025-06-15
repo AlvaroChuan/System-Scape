@@ -10,7 +10,17 @@ public class HUDManager : MonoBehaviour
     public static HUDManager instance;
     [SerializeField] private Text oxygenText;
     [SerializeField] private Text healthText;
-    [SerializeField] private GameObject padUI;
+
+    [Header("Upgrades HUD")]
+    [SerializeField] private GameObject PauseHUD;
+    [SerializeField] private Button resumeButton; // Reference to set as the selected button for the event system
+    [SerializeField] private Button backButton; // Reference to set as the selected button for the event sysstem
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private TMP_Text tabText;
+
+    [Header("Upgrades HUD")]
+    [SerializeField] private GameObject UpgradesHUD;
     [SerializeField] private Color panelColor;
     [SerializeField] private Color headerColor;
     [SerializeField] private Button equipmentButton;
@@ -19,8 +29,11 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private GameObject equipmentPanel;
     [SerializeField] private GameObject spaceshipPanel;
     [SerializeField] private GameObject gadgetsPanel;
+
+    [Header("Selection Rect")]
     [SerializeField] private Image selectionRect;
-    [SerializeField] private UnityEngine.Material crtMaterial;
+
+
     private GameObject currentPanel;
     private int currentSubPanelIndex = 0;
     private bool onUI = false;
@@ -30,7 +43,6 @@ public class HUDManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            currentPanel = equipmentPanel;
             DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
@@ -59,16 +71,27 @@ public class HUDManager : MonoBehaviour
                 selectionRect.rectTransform.sizeDelta = Vector3.Lerp(selectionRect.rectTransform.sizeDelta, EventSystem.current.currentSelectedGameObject.GetComponent<RectTransform>().sizeDelta, Time.fixedDeltaTime * 10f);
             }
         }
-        crtMaterial.SetFloat("_CustomTime", Time.fixedDeltaTime);
     }
 
-    public void TogglePadUI(bool state)
+    public void ToggleHUD(bool state, string type)
     {
-        padUI.SetActive(state);
+        switch (type)
+        {
+            case "Upgrades":
+                UpgradesHUD.SetActive(state);
+                if (state) EventSystem.current.SetSelectedGameObject(equipmentButton.gameObject);
+                ToggleUpgradesPanel(equipmentPanel);
+                break;
+            case "Pause":
+                PauseHUD.SetActive(state);
+                if (state) EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+                break;
+        }
         onUI = state;
+        selectionRect.gameObject.SetActive(state);
     }
 
-    public void TogglePanel(GameObject panel)
+    public void ToggleUpgradesPanel(GameObject panel)
     {
         GameObject[] panelList = new GameObject[] { equipmentPanel, spaceshipPanel, gadgetsPanel };
         Button[] buttonList = new Button[] { equipmentButton, spaceshipButton, gadgetsButton };
@@ -96,7 +119,7 @@ public class HUDManager : MonoBehaviour
         currentPanel = panel;
     }
 
-    public void NextSubPanel()
+    public void NextUpgradesSubPanel()
     {
         if (currentPanel == null) return;
         List<GameObject> panelList = new List<GameObject>();
@@ -107,7 +130,7 @@ public class HUDManager : MonoBehaviour
         panelList[currentSubPanelIndex].SetActive(true);
     }
 
-    public void PreviousSubPanel()
+    public void PreviousUpgradesSubPanel()
     {
         if (currentPanel == null) return;
         List<GameObject> panelList = new List<GameObject>();
@@ -126,5 +149,26 @@ public class HUDManager : MonoBehaviour
         else if (result == 1) Debug.Log("Upgrade already purchased: " + upgrade.upgradeName);
         else if (result == 2) Debug.Log("Prerequisites not met");
         else if (result == 3) Debug.Log("Not enough resources to purchase upgrade: " + upgrade.upgradeName);
+    }
+
+    public void OpenOptionsPanel()
+    {
+        pausePanel.SetActive(false);
+        settingsPanel.SetActive(true);
+        tabText.text = "Options";
+        EventSystem.current.SetSelectedGameObject(backButton.gameObject);
+    }
+
+    public void CloseOptionsPanel()
+    {
+        pausePanel.SetActive(true);
+        settingsPanel.SetActive(false);
+        tabText.text = "Pause Menu";
+        EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+    }
+
+    public void Quit()
+    {
+        GameManager.instance.QuitGame();
     }
 }

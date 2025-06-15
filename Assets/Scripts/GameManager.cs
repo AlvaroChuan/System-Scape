@@ -83,11 +83,19 @@ public class GameManager : MonoBehaviour
     private int selectedGadget = 0;
     public int SelectedGadget => selectedGadget; // 0 = Drill, 1 = Sword, 2 = Gun
     private float swordDamage = 10f;
+    public float SwordDamage => swordDamage;
     private float bulletDamage = 2.5f;
+    public float BulletDamage => bulletDamage;
     private int bulletsPerBurst = 3;
+    public int BulletsPerBurst => bulletsPerBurst;
+    private float aimRangeRifle = 10f;
+    public float AimRangeRifle => aimRangeRifle;
+    public float aimSwordRange = 2f;
+    public float AimSwordRange => aimSwordRange;
     private int drillGadgetTier = 1;
     public int DrillGadgetTier => drillGadgetTier;
     private float drillDistance = 2.5f;
+    public float DrillDistance => drillDistance;
     private bool jetpackEnabled = false;
     public bool JetpackEnabled => jetpackEnabled;
     private bool FlashlightEnabled = false;
@@ -98,6 +106,9 @@ public class GameManager : MonoBehaviour
     public bool EnemyDetectionEnabled => enemyDetectionEnabled;
     private bool flightCompanionEnabled = false;
     public bool FlightCompanionEnabled => flightCompanionEnabled;
+
+    //Enemies
+    public List<Enemy> enemiesInMaxRange = new List<Enemy>();
 
     // Upgrades
     public List<Upgrade> upgrades; // List of all available upgrades
@@ -433,6 +444,11 @@ public class GameManager : MonoBehaviour
                 if (petralact < maxAmmountPerMaterial) petralact++;
                 break;
         }
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 
     private IEnumerator OxygenManagement()

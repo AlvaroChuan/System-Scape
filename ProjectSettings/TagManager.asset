@@ -8,6 +8,7 @@ TagManager:
   - Spacereck
   - Material
   - HUD camera
+  - Enemy
   layers:
   - Default
   - TransparentFX

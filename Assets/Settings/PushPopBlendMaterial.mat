@@ -21,10 +21,11 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PushPopBlendMaterial
-  m_Shader: {fileID: 4800000, guid: ead042b15694c7542b84645831fd0698, type: 3}
+  m_Shader: {fileID: 4800000, guid: 0b2f057c3223fb9489cad23169b82a99, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _USE_FBF
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -125,7 +126,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
-    - _SrcFactor: 1
+    - _SrcFactor: 5
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
