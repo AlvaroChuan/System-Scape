@@ -68,4 +68,4 @@ MonoBehaviour:
   push: 0
   pop: 600
   blendMaterial: {fileID: 2100000, guid: eb675d4a80916cf49936cbc7d741624e, type: 2}
-  useFBF: 1
+  useFBF: 0

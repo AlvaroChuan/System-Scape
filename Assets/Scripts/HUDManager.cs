@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class HUDManager : MonoBehaviour
 {
@@ -11,12 +12,14 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private Text oxygenText;
     [SerializeField] private Text healthText;
 
-    [Header("Upgrades HUD")]
+    [Header("Pause HUD")]
     [SerializeField] private GameObject PauseHUD;
     [SerializeField] private Button resumeButton; // Reference to set as the selected button for the event system
     [SerializeField] private Button backButton; // Reference to set as the selected button for the event sysstem
     [SerializeField] private GameObject pausePanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private Slider musicSlider;
+    [SerializeField] private Slider sfxSlider;
     [SerializeField] private TMP_Text tabText;
 
     [Header("Upgrades HUD")]
@@ -75,6 +78,8 @@ public class HUDManager : MonoBehaviour
 
     public void ToggleHUD(bool state, string type)
     {
+        UpgradesHUD.SetActive(false);
+        PauseHUD.SetActive(false);
         switch (type)
         {
             case "Upgrades":
@@ -84,6 +89,8 @@ public class HUDManager : MonoBehaviour
                 break;
             case "Pause":
                 PauseHUD.SetActive(state);
+                musicSlider.value = SoundManager.instance.GetMusicVolume();
+                sfxSlider.value = SoundManager.instance.GetSFXVolume();
                 if (state) EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
                 break;
         }
@@ -165,6 +172,23 @@ public class HUDManager : MonoBehaviour
         settingsPanel.SetActive(false);
         tabText.text = "Pause Menu";
         EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+    }
+
+    public void ClosePad()
+    {
+        ToggleHUD(false, "Pause");
+        if (SceneManager.GetActiveScene().name != "Space") PlayerController.instance.ClosePad("Pause");
+        else SpaceshipController.instance.ClosePad("Pause");
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        SoundManager.instance.SetMusicVolume(volume);
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        SoundManager.instance.SetSfxVolume(volume);
     }
 
     public void Quit()

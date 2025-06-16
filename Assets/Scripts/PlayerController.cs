@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    // Singleton for easy access
+    public static PlayerController instance;
+
     // Input system
     private InputSystem_Actions inputActions;
     private InputAction moveAction;
@@ -40,22 +43,24 @@ public class PlayerController : MonoBehaviour
     // Usage control variables
     private bool usingDrill = false;
     private bool usingPad = false;
+    private string currentPadMenu = "";
     private Vector3 padOriginalPosition;
     private Vector3 padOriginalRotation;
     private Coroutine padCoroutine;
     private bool lockOnTarget = false;
     private Enemy target;
+    private bool canUseSpaceship = false;
+    private Coroutine mountSpaceshipCoroutine;
 
     private void Awake()
     {
+        PlayerController.instance = this;
         inputActions = new InputSystem_Actions();
         rb = GetComponent<Rigidbody>();
         cameraController = Camera.main.transform.parent.GetComponent<CameraController>();
         mainCamera = Camera.main;
         padOriginalPosition = pad.transform.localPosition;
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
-        if (drillRangeCollider.radius != GameManager.instance.DrillDistance) drillRangeCollider.radius = GameManager.instance.DrillDistance;
-        if (rifleRangeCollider.radius != GameManager.instance.AimRangeRifle) rifleRangeCollider.radius = GameManager.instance.AimRangeRifle;
     }
 
     private void OnEnable()
@@ -212,6 +217,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
+        if (canUseSpaceship)
+        {
+            if(mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
+            mountSpaceshipCoroutine = StartCoroutine(MountSpaceship());
+            return;
+        }
+
         switch (GameManager.instance.SelectedGadget)
         {
             case 0:
@@ -221,16 +233,17 @@ public class PlayerController : MonoBehaviour
                 GameManager.instance.drillableMaterials[0].DrillMaterial();
                 break;
             case 1:
-                if(canAttack) Slice();
+                if (canAttack) Slice();
                 break;
             case 2:
-                if(canAttack) StartCoroutine(Shoot());
+                if (canAttack) StartCoroutine(Shoot());
                 break;
         }
     }
 
     private void OnEndInteract(InputAction.CallbackContext context)
     {
+        if(mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
         switch (GameManager.instance.SelectedGadget)
         {
             case 0:
@@ -262,18 +275,41 @@ public class PlayerController : MonoBehaviour
 
     private void OnOpenPad(InputAction.CallbackContext context) //TODO
     {
-        usingPad = !usingPad;
-        canMove = !canMove;
-        if (padCoroutine != null) StopCoroutine(padCoroutine);
-        padCoroutine = StartCoroutine(MovePadToTarget(usingPad, "Upgrades"));
+        if (currentPadMenu == "Upgrades") ClosePad("Upgrades");
+        else OpenPad("Upgrades");
     }
 
     private void OnPause(InputAction.CallbackContext context) //TODO
     {
-        usingPad = !usingPad;
-        canMove = !canMove;
+        if (currentPadMenu == "Pause") ClosePad("Pause");
+        else OpenPad("Pause");
+    }
+
+    public void OpenPad(string menu)
+    {
+        canMove = false;
+        currentPadMenu = menu;
+        if (usingPad) HUDManager.instance.ToggleHUD(true, menu);
+        else
+        {
+            if (padCoroutine != null) StopCoroutine(padCoroutine);
+            padCoroutine = StartCoroutine(MovePadToTarget(true, menu));
+        }
+        usingPad = true;
+    }
+
+    public void ClosePad(string menu)
+    {
+        canMove = true;
         if (padCoroutine != null) StopCoroutine(padCoroutine);
-        padCoroutine = StartCoroutine(MovePadToTarget(usingPad, "Pause"));
+        padCoroutine = StartCoroutine(MovePadToTarget(false, menu));
+        usingPad = false;
+        currentPadMenu = "";
+    }
+
+    public void AllowSpaceshipMount(bool allow)
+    {
+        canUseSpaceship = allow;
     }
 
     private void Slice()
@@ -287,6 +323,17 @@ public class PlayerController : MonoBehaviour
         if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimSwordRange) target.TakeDamage(GameManager.instance.SwordDamage);
         lockOnTarget = false;
         StartCoroutine(AttackCooldown());
+    }
+
+    private IEnumerator MountSpaceship()
+    {
+        float timeRemaining = 3f;
+        while (timeRemaining > 0 && canUseSpaceship)
+        {
+            timeRemaining -= Time.deltaTime;
+            yield return null;
+        }
+        if(timeRemaining <= 0 && canUseSpaceship) GameManager.instance.LoadScene("Space");
     }
 
     private IEnumerator Shoot()

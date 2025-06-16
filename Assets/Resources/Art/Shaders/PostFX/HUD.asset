@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-3357603926938260329
+--- !u!114 &-7369730522992815297
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17,18 +17,35 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: {r: 0, g: 0, b: 0, a: 1}
   center:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.263
+    m_Value: 0.393
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.266
+    m_Value: 0.2
   rounded:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 0
---- !u!114 &-3111408176822289582
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
+  m_Name: HUD
+  m_EditorClassIdentifier: 
+  components:
+  - {fileID: 173165353887949001}
+  - {fileID: -7369730522992815297}
+  - {fileID: 149271994511416770}
+  - {fileID: 7916311384175653254}
+--- !u!114 &149271994511416770
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,25 +60,27 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.219
---- !u!114 &11400000
+    m_Value: 0.279
+--- !u!114 &173165353887949001
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
-  m_Name: SampleSceneProfile
+  m_Script: {fileID: 11500000, guid: fb60a22f311433c4c962b888d1393f88, type: 3}
+  m_Name: PaniniProjection
   m_EditorClassIdentifier: 
-  components:
-  - {fileID: -3357603926938260329}
-  - {fileID: 1252364876721592323}
-  - {fileID: -3111408176822289582}
-  - {fileID: 1015753726369706611}
---- !u!114 &1015753726369706611
+  active: 1
+  distance:
+    m_OverrideState: 1
+    m_Value: 0.124
+  cropToFit:
+    m_OverrideState: 0
+    m_Value: 1
+--- !u!114 &7916311384175653254
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,29 +98,10 @@ MonoBehaviour:
     m_Value: 10
   intensity:
     m_OverrideState: 1
-    m_Value: 0.147
+    m_Value: 0.119
   response:
     m_OverrideState: 1
-    m_Value: 0.577
+    m_Value: 0.8
   texture:
     m_OverrideState: 1
     m_Value: {fileID: 2800000, guid: e53dec180de961744ab2aa00f3fd2596, type: 3}
---- !u!114 &1252364876721592323
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb60a22f311433c4c962b888d1393f88, type: 3}
-  m_Name: PaniniProjection
-  m_EditorClassIdentifier: 
-  active: 1
-  distance:
-    m_OverrideState: 1
-    m_Value: 0.126
-  cropToFit:
-    m_OverrideState: 0
-    m_Value: 1
