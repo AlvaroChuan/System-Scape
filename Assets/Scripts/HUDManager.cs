@@ -9,8 +9,6 @@ public class HUDManager : MonoBehaviour
 {
     // Singleton
     public static HUDManager instance;
-    [SerializeField] private Text oxygenText;
-    [SerializeField] private Text healthText;
 
     [Header("Pause HUD")]
     [SerializeField] private GameObject PauseHUD;
@@ -26,12 +24,40 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private GameObject UpgradesHUD;
     [SerializeField] private Color panelColor;
     [SerializeField] private Color headerColor;
+    [SerializeField] private Button statsButton;
     [SerializeField] private Button equipmentButton;
     [SerializeField] private Button spaceshipButton;
     [SerializeField] private Button gadgetsButton;
+    [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject equipmentPanel;
     [SerializeField] private GameObject spaceshipPanel;
     [SerializeField] private GameObject gadgetsPanel;
+
+    [Header("Stats elements")]
+    [SerializeField] private TMP_Text healthAmountText;
+    [SerializeField] private Image healthFillImage;
+    [SerializeField] private TMP_Text oxygenAmountText;
+    [SerializeField] private Image oxygenFillImage;
+    [SerializeField] private TMP_Text ironAmountText;
+    [SerializeField] private Image ironFillImage;
+    [SerializeField] private TMP_Text copperAmountText;
+    [SerializeField] private Image copperFillImage;
+    [SerializeField] private TMP_Text magnetiteAmountText;
+    [SerializeField] private Image magnetiteFillImage;
+    [SerializeField] private TMP_Text quartzAmountText;
+    [SerializeField] private Image quartzFillImage;
+    [SerializeField] private TMP_Text phobositeAmountText;
+    [SerializeField] private Image phobositeFillImage;
+    [SerializeField] private TMP_Text radiumAmountText;
+    [SerializeField] private Image radiumFillImage;
+    [SerializeField] private TMP_Text glaciateAmountText;
+    [SerializeField] private Image glaciateFillImage;
+    [SerializeField] private TMP_Text bismuthAmountText;
+    [SerializeField] private Image bismuthFillImage;
+    [SerializeField] private TMP_Text platinumAmountText;
+    [SerializeField] private Image platinumFillImage;
+    [SerializeField] private TMP_Text petralactAmountText;
+    [SerializeField] private Image petralactFillImage;
 
     [Header("Selection Rect")]
     [SerializeField] private Image selectionRect;
@@ -53,8 +79,33 @@ public class HUDManager : MonoBehaviour
 
     private void Update()
     {
-        oxygenText.text = $"Oxygen: {GameManager.instance.OxygenLevel:F1} / {GameManager.instance.MaxOxygen:F1}";
-        healthText.text = $"Health: {GameManager.instance.CurrentHP:F1} / {GameManager.instance.MaxHP:F1}";
+        // Update stats
+        healthAmountText.text = GameManager.instance.CurrentHP + " / " + GameManager.instance.MaxHP;
+        healthFillImage.fillAmount = GameManager.instance.CurrentHP / GameManager.instance.MaxHP;
+        oxygenAmountText.text = GameManager.instance.OxygenLevel + " / " + GameManager.instance.MaxOxygen;
+        oxygenFillImage.fillAmount = GameManager.instance.OxygenLevel / GameManager.instance.MaxOxygen;
+        ironAmountText.text = GameManager.instance.Iron + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        ironFillImage.fillAmount = GameManager.instance.Iron / GameManager.instance.MaxAmmountPerMaterial;
+        copperAmountText.text = GameManager.instance.Copper + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        copperFillImage.fillAmount = GameManager.instance.Copper / GameManager.instance.MaxAmmountPerMaterial;
+        magnetiteAmountText.text = GameManager.instance.Magnetite + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        magnetiteFillImage.fillAmount = GameManager.instance.Magnetite / GameManager.instance.MaxAmmountPerMaterial;
+        quartzAmountText.text = GameManager.instance.Quartz + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        quartzFillImage.fillAmount = GameManager.instance.Quartz / GameManager.instance.MaxAmmountPerMaterial;
+        phobositeAmountText.text = GameManager.instance.Phobosite + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        phobositeFillImage.fillAmount = GameManager.instance.Phobosite / GameManager.instance.MaxAmmountPerMaterial;
+        radiumAmountText.text = GameManager.instance.Radium + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        radiumFillImage.fillAmount = GameManager.instance.Radium / GameManager.instance.MaxAmmountPerMaterial;
+        glaciateAmountText.text = GameManager.instance.Glaciate + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        glaciateFillImage.fillAmount = GameManager.instance.Glaciate / GameManager.instance.MaxAmmountPerMaterial;
+        bismuthAmountText.text = GameManager.instance.Bismuth + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        bismuthFillImage.fillAmount = GameManager.instance.Bismuth / GameManager.instance.MaxAmmountPerMaterial;
+        platinumAmountText.text = GameManager.instance.Platinum + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        platinumFillImage.fillAmount = GameManager.instance.Platinum / GameManager.instance.MaxAmmountPerMaterial;
+        petralactAmountText.text = GameManager.instance.Petralact + " / " + GameManager.instance.MaxAmmountPerMaterial;
+        petralactFillImage.fillAmount = GameManager.instance.Petralact / GameManager.instance.MaxAmmountPerMaterial;
+
+        // Seletor
         if (onUI && EventSystem.current.currentSelectedGameObject != null)
         {
             if (EventSystem.current.currentSelectedGameObject.transform.parent != null && EventSystem.current.currentSelectedGameObject.name == "Button")
@@ -84,8 +135,8 @@ public class HUDManager : MonoBehaviour
         {
             case "Upgrades":
                 UpgradesHUD.SetActive(state);
-                if (state) EventSystem.current.SetSelectedGameObject(equipmentButton.gameObject);
-                ToggleUpgradesPanel(equipmentPanel);
+                if (state) EventSystem.current.SetSelectedGameObject(statsButton.gameObject);
+                ToggleUpgradesPanel(statsPanel);
                 break;
             case "Pause":
                 PauseHUD.SetActive(state);
@@ -100,8 +151,8 @@ public class HUDManager : MonoBehaviour
 
     public void ToggleUpgradesPanel(GameObject panel)
     {
-        GameObject[] panelList = new GameObject[] { equipmentPanel, spaceshipPanel, gadgetsPanel };
-        Button[] buttonList = new Button[] { equipmentButton, spaceshipButton, gadgetsButton };
+        GameObject[] panelList = new GameObject[] { statsPanel, equipmentPanel, spaceshipPanel, gadgetsPanel };
+        Button[] buttonList = new Button[] { statsButton, equipmentButton, spaceshipButton, gadgetsButton };
         foreach (GameObject go in panelList) go.SetActive(go == panel);
         foreach (Button btn in buttonList)
         {
@@ -110,6 +161,10 @@ public class HUDManager : MonoBehaviour
         }
         switch (panel)
         {
+            case GameObject go when go == statsPanel:
+                statsButton.image.color = panelColor;
+                statsButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.white;
+                break;
             case GameObject go when go == equipmentPanel:
                 equipmentButton.image.color = panelColor;
                 equipmentButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.white;
@@ -194,5 +249,10 @@ public class HUDManager : MonoBehaviour
     public void Quit()
     {
         GameManager.instance.QuitGame();
+    }
+
+    public void SetTargetCamera(Camera cam)
+    {
+        gameObject.GetComponent<Canvas>().worldCamera = cam;
     }
 }

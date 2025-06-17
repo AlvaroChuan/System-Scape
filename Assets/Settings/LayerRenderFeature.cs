@@ -57,7 +57,7 @@ public class LayerRenderFeature : ScriptableRendererFeature
                     bindTextureMS = false,
                     dimension = TextureDimension.Tex2D, //TODO?
                     slices = info.volumeDepth
-                };     
+                };
             }
             else
             {
@@ -72,7 +72,7 @@ public class LayerRenderFeature : ScriptableRendererFeature
             desc.clearBuffer = true;
             desc.clearColor = new Color(1.0f, 1.0f, 1.0f, 0.0f);
             desc.name = "_CameraColorLayer" + layers.layers.Count;
-            
+
             var layerColor = renderGraph.CreateTexture(desc);
 
             resourcesData.cameraColor = layerColor;

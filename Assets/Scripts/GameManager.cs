@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -46,6 +47,7 @@ public class GameManager : MonoBehaviour
 
     // Materials
     private int maxAmmountPerMaterial = 30;
+    public int MaxAmmountPerMaterial => maxAmmountPerMaterial;
     public List<Material> drillableMaterials = new List<Material>();
     private int iron = 0;
     public int Iron => iron;
@@ -116,6 +118,11 @@ public class GameManager : MonoBehaviour
     // Coroutines
     private Coroutine healthRegenCoroutine;
 
+    // Space
+    public float solarSystemRotation;
+    public float solarSystemStarSize = 100f;
+    public string lastPlanet = "Mercum";
+
     private void Awake()
     {
         if (instance == null)
@@ -131,6 +138,7 @@ public class GameManager : MonoBehaviour
     {
         ResetVariables();
         StartCoroutine(OxygenManagement());
+        StartCoroutine(SolarSystemManagement());
     }
 
     private void ResetVariables()
@@ -460,7 +468,7 @@ public class GameManager : MonoBehaviour
     {
         while (true)
         {
-            currentOxygen = regenerateOxygen ? Mathf.Min(currentOxygen + oxygenRegenAmmount, maxOxygen) : Mathf.Max(currentOxygen - oxygenUseRate, 0f);
+            if(SceneManager.GetActiveScene().name != "Space") currentOxygen = regenerateOxygen ? Mathf.Min(currentOxygen + oxygenRegenAmmount, maxOxygen) : Mathf.Max(currentOxygen - oxygenUseRate, 0f);
             yield return new WaitForSeconds(oxygenUseInterval);
             if (currentOxygen <= 0f) EndRun(); // End run if oxygen runs out
         }
@@ -475,4 +483,16 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(healthRegenInterval);
         }
     }
+
+    private IEnumerator SolarSystemManagement()
+    {
+        while (true)
+        {
+            solarSystemRotation += Time.fixedDeltaTime * 0.25f;
+            if (solarSystemRotation >= 360f) solarSystemRotation -= 360f;
+            solarSystemStarSize += Time.fixedDeltaTime * 0.25f;
+            yield return null;
+        }
+    }
+
 }

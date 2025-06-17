@@ -30,7 +30,7 @@ public class SpaceshipController : MonoBehaviour
     private Vector3 padOriginalRotation;
     private Coroutine padCoroutine;
     private string currentPadMenu = "";
-    private string nearPlanet = "";
+    public string nearPlanet = "";
     private float actualAcceleration = 0f;
     private Coroutine landingCoroutine;
     private float rotation;
@@ -44,6 +44,13 @@ public class SpaceshipController : MonoBehaviour
         padOriginalPosition = pad.transform.localPosition;
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
         rb = gameObject.GetComponent<Rigidbody>();
+    }
+
+    public void SetPosition()
+    {
+        GameObject spawnPlanet = GameObject.Find(GameManager.instance.lastPlanet);
+        rb.position = spawnPlanet.transform.position - spawnPlanet.transform.right * 55f;
+        cameraController.gameObject.transform.position = rb.position;
     }
 
     private void OnEnable()
@@ -111,7 +118,7 @@ public class SpaceshipController : MonoBehaviour
         if (usingPad) return;
         Vector2 input = moveAction.ReadValue<Vector2>();
         rotation += input.x;
-        if (input != Vector2.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, rotation, 0), Time.deltaTime * turnSpeed);
+        if (input != Vector2.zero || transform.rotation.eulerAngles.y != rotation) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, rotation, 0), Time.deltaTime * turnSpeed);
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
         if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
@@ -119,9 +126,13 @@ public class SpaceshipController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (usingPad) return;
-        rb.AddForce(transform.forward * accelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration, ForceMode.Acceleration);
-        rb.AddForce(transform.forward * -decelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration, ForceMode.Acceleration);
+        if (usingPad)
+        {
+            rb.linearVelocity = Vector3.zero;
+            return;
+        }
+        rb.AddForce(transform.forward * accelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration * 5, ForceMode.Acceleration);
+        rb.AddForce(transform.forward * -decelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration * 5, ForceMode.Acceleration);
         if (rb.linearVelocity.magnitude > GameManager.instance.MaxSpaceshipSpeed) rb.linearVelocity = rb.linearVelocity.normalized * GameManager.instance.MaxSpaceshipSpeed;
     }
 
@@ -129,6 +140,7 @@ public class SpaceshipController : MonoBehaviour
     {
         if (nearPlanet != "")
         {
+            Debug.Log("Landing on " + nearPlanet);
             if (landingCoroutine != null) StopCoroutine(landingCoroutine);
             landingCoroutine = StartCoroutine(LandOnPlanet());
         }

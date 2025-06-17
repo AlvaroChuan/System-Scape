@@ -14,11 +14,18 @@ public class CameraController : MonoBehaviour
     private RaycastHit hit;
     private Vector3 wishedCameraPosition;
     private Camera mainCamera;
+    private Camera HUDCamera;
 
     private void Awake()
     {
         mainCamera = Camera.main;
+        HUDCamera = transform.GetChild(1).GetComponent<Camera>();
         ForceAspectRatio();
+    }
+
+    private void Start()
+    {
+        HUDManager.instance.SetTargetCamera(HUDCamera);
     }
 
     private void Update()
