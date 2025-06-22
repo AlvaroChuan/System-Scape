@@ -25,6 +25,7 @@ public class Material : MonoBehaviour
             drillCoroutine = null;
         }
         drillTime = 3f; // Reset drill time
+        Debug.Log("Drilling stopped.");
     }
 
     private IEnumerator DrillCoroutine()

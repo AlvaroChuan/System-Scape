@@ -20,6 +20,10 @@ public class SpaceshipController : MonoBehaviour
     [Header("Spaceship Settings")]
     [SerializeField] private float turnSpeed;
     [SerializeField] private GameObject pad;
+    [SerializeField] private ParticleSystem leftEngine;
+    [SerializeField] private ParticleSystem rightEngine;
+    [SerializeField] private ParticleSystem leftEngineBrake;
+    [SerializeField] private ParticleSystem rightEngineBrake;
 
 
     private bool usingPad = false;
@@ -31,7 +35,6 @@ public class SpaceshipController : MonoBehaviour
     private Coroutine padCoroutine;
     private string currentPadMenu = "";
     public string nearPlanet = "";
-    private float actualAcceleration = 0f;
     private Coroutine landingCoroutine;
     private float rotation;
 
@@ -63,9 +66,29 @@ public class SpaceshipController : MonoBehaviour
 
         accelerateSpaceshipAction = inputActions.Player.AccelerateSpaceship;
         accelerateSpaceshipAction.Enable();
+        accelerateSpaceshipAction.started += context => {
+            leftEngineBrake.Stop();
+            rightEngineBrake.Stop();
+            leftEngine.Play();
+            rightEngine.Play();
+        };
+        accelerateSpaceshipAction.canceled += context => {
+            leftEngine.Stop();
+            rightEngine.Stop();
+        };
 
         decelerateSpaceshipAction = inputActions.Player.DecelerateSpaceship;
         decelerateSpaceshipAction.Enable();
+        decelerateSpaceshipAction.started += context => {
+            leftEngine.Stop();
+            rightEngine.Stop();
+            leftEngineBrake.Play();
+            rightEngineBrake.Play();
+        };
+        decelerateSpaceshipAction.canceled += context => {
+            leftEngineBrake.Stop();
+            rightEngineBrake.Stop();
+        };
 
         interactAction = inputActions.Player.Interact;
         interactAction.Enable();
@@ -89,7 +112,27 @@ public class SpaceshipController : MonoBehaviour
         if (moveAction != null) moveAction.Disable();
         if (lookAction != null) lookAction.Disable();
         if (accelerateSpaceshipAction != null) accelerateSpaceshipAction.Disable();
+        accelerateSpaceshipAction.started -= context => {
+            leftEngineBrake.Stop();
+            rightEngineBrake.Stop();
+            leftEngine.Play();
+            rightEngine.Play();
+        };
+        accelerateSpaceshipAction.canceled -= context => {
+            leftEngine.Stop();
+            rightEngine.Stop();
+        };
         if (decelerateSpaceshipAction != null) decelerateSpaceshipAction.Disable();
+        decelerateSpaceshipAction.started -= context => {
+            leftEngine.Stop();
+            rightEngine.Stop();
+            leftEngineBrake.Play();
+            rightEngineBrake.Play();
+        };
+        decelerateSpaceshipAction.canceled -= context => {
+            leftEngineBrake.Stop();
+            rightEngineBrake.Stop();
+        };
 
         if (interactAction != null)
         {

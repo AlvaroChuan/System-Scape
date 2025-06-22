@@ -38,11 +38,12 @@ public class PlayerController : MonoBehaviour
     private bool canMove = true;
     private bool canJump = true;
     private bool canAttack = true;
-    private bool usingJectpack = false;
+    private bool usingJetpack = false;
 
     // Usage control variables
     private bool usingDrill = false;
     private bool usingPad = false;
+    private bool gettingOxygen = false;
     private string currentPadMenu = "";
     private Transform padOriginalParent;
     private Vector3 padOriginalPosition;
@@ -56,6 +57,13 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     [SerializeField] private GameObject rifle;
     [SerializeField] private GameObject sword;
+    [SerializeField] private GameObject drill;
+    [SerializeField] private ParticleSystem jetpackParticles1;
+    [SerializeField] private ParticleSystem jetpackParticles2;
+    [SerializeField] private GameObject rifleBurst;
+    [SerializeField] private LineRenderer drillLine;
+    [SerializeField] private LineRenderer oxygenLine;
+    private GameObject oxygenOrigin;
 
     private void Awake()
     {
@@ -195,6 +203,24 @@ public class PlayerController : MonoBehaviour
         // Handle jump
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
         animator.SetBool("Grounded", canJump);
+
+        // Handle drill usage
+        if (usingDrill && GameManager.instance.drillableMaterials.Count > 0)
+        {
+            drillLine.enabled = true;
+            drillLine.SetPosition(0, drillLine.transform.position);
+            drillLine.SetPosition(1, GameManager.instance.drillableMaterials[0].transform.position);
+        }
+        else drillLine.enabled = false;
+
+        // Handle oxygen regeneration
+        if (gettingOxygen)
+        {
+            oxygenLine.enabled = true;
+            oxygenLine.SetPosition(0, oxygenOrigin.transform.position);
+            oxygenLine.SetPosition(1, transform.position + Vector3.up * 0.5f);
+        }
+        else oxygenLine.enabled = false;
     }
 
     private void FixedUpdate()
@@ -208,7 +234,7 @@ public class PlayerController : MonoBehaviour
         velocity.x = move ? moveDirection.x * GameManager.instance.PlayerSpeed : 0;
         velocity.z = move ? moveDirection.z * GameManager.instance.PlayerSpeed : 0;
         rb.linearVelocity = velocity;
-        if (usingJectpack) rb.AddForce(Vector3.up * GameManager.instance.JetpackForce, ForceMode.Force);
+        if (usingJetpack) rb.AddForce(Vector3.up * GameManager.instance.JetpackForce, ForceMode.Force);
     }
 
     private void OnJump(InputAction.CallbackContext context)
@@ -216,13 +242,20 @@ public class PlayerController : MonoBehaviour
         if (usingPad) return;
         if (canJump) animator.SetTrigger("Jump");
         if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
-        else if (!canJump && GameManager.instance.JetpackEnabled) usingJectpack = true;
+        else if (!canJump && GameManager.instance.JetpackEnabled)
+        {
+            usingJetpack = true;
+            jetpackParticles1.Play();
+            jetpackParticles2.Play();
+        }
     }
 
     private void OnEndJump(InputAction.CallbackContext context)
     {
         if (usingPad) return;
-        usingJectpack = false; // Stop using jetpack when jump is released
+        usingJetpack = false; // Stop using jetpack when jump is released
+        jetpackParticles1.Stop();
+        jetpackParticles2.Stop();
     }
 
     private void OnInteract(InputAction.CallbackContext context)
@@ -333,8 +366,13 @@ public class PlayerController : MonoBehaviour
         target = enemiesInRange[0];
         lockOnTarget = true;
         if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimSwordRange) target.TakeDamage(GameManager.instance.SwordDamage);
-        lockOnTarget = false;
         StartCoroutine(AttackCooldown());
+    }
+
+    public void SetOxygenOrigin(bool state, GameObject origin = null)
+    {
+        oxygenOrigin = origin;
+        gettingOxygen = state;
     }
 
     private IEnumerator MountSpaceship()
@@ -360,7 +398,10 @@ public class PlayerController : MonoBehaviour
         {
             if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.TakeDamage(GameManager.instance.BulletDamage);
             animator.SetTrigger("Attack");
-            yield return new WaitForSeconds(0.1f);
+            rifleBurst.SetActive(true);
+            yield return new WaitForSeconds(0.25f);
+            rifleBurst.SetActive(false);
+            yield return null;
         }
         lockOnTarget = false;
         StartCoroutine(AttackCooldown());
@@ -370,6 +411,7 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         canAttack = true;
+        lockOnTarget = false;
     }
 
     private IEnumerator MovePadToTarget(bool toCamera, string menu)
@@ -413,18 +455,11 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("Hit");
     }
 
-    public void SetAnimTree(bool value)
+    public void SetAnimTree(int selectedGadget)
     {
-        animator.SetBool("Sword?", value);
-        if (value)
-        {
-            rifle.SetActive(false);
-            sword.SetActive(true);
-        }
-        else
-        {
-            rifle.SetActive(true);
-            sword.SetActive(false);
-        }
+        animator.SetBool("Sword?", selectedGadget == 1);
+        rifle.SetActive(selectedGadget == 2);
+        sword.SetActive(selectedGadget == 1);
+        drill.SetActive(selectedGadget == 0);
     }
 }

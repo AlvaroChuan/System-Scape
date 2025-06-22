@@ -211,7 +211,7 @@ public class GameManager : MonoBehaviour
         selectedGadget += forward ? 1 : -1;
         if (selectedGadget < 0) selectedGadget = 2;
         else if (selectedGadget > 2) selectedGadget = 0;
-        PlayerController.instance.SetAnimTree(selectedGadget == 1);
+        PlayerController.instance.SetAnimTree(selectedGadget);
     }
 
     public int ApplyUpgrade(Upgrade upgrade) // Returns 0 if successful, 1 if already active, 2 if prerequisites not met, 3 if not enough resources

@@ -9,6 +9,10 @@ public class DrillRangeController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag is "Material") GameManager.instance.drillableMaterials.Remove(other.gameObject.GetComponent<Material>());
+        if (other.gameObject.tag is "Material")
+        {
+            other.gameObject.GetComponent<Material>().StopDrilling();
+            GameManager.instance.drillableMaterials.Remove(other.gameObject.GetComponent<Material>());
+        }
     }
 }
