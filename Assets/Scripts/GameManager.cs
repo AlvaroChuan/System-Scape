@@ -211,6 +211,7 @@ public class GameManager : MonoBehaviour
         selectedGadget += forward ? 1 : -1;
         if (selectedGadget < 0) selectedGadget = 2;
         else if (selectedGadget > 2) selectedGadget = 0;
+        PlayerController.instance.SetAnimTree(selectedGadget == 1);
     }
 
     public int ApplyUpgrade(Upgrade upgrade) // Returns 0 if successful, 1 if already active, 2 if prerequisites not met, 3 if not enough resources
@@ -407,6 +408,7 @@ public class GameManager : MonoBehaviour
 
     public void DamagePlayer(int damage)
     {
+        PlayerController.instance.Damage();
         if (Random.Range(0, 1f) < reflectionChance) return; // Reflect damage if chance is met
         currentHP -= Mathf.Max(0, damage - (int)(damage * damageReduction)); // Apply damage reduction
         if (currentHP <= 0) EndRun();

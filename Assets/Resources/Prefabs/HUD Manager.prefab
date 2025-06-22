@@ -4656,7 +4656,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.0041732397, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -3, y: -188}
+  m_AnchoredPosition: {x: -3, y: -3}
   m_SizeDelta: {x: 6, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3645028433094792364
@@ -5697,7 +5697,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Spacehsip
+  m_text: 'Spaceship
 
 '
   m_isRightToLeft: 0
@@ -8692,7 +8692,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 215.60953, y: 908.4668}
+  m_AnchoredPosition: {x: 215.6095, y: 908.4668}
   m_SizeDelta: {x: 253.219, y: 55.54602}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4173320643264631572
@@ -10275,7 +10275,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -330.19995, y: 83.99994}
+  m_AnchoredPosition: {x: -330.2, y: 83.99994}
   m_SizeDelta: {x: -934.5135, y: -350.5133}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1305117116247999745
@@ -10352,7 +10352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -169.61005, y: 27.996902}
+  m_AnchoredPosition: {x: -169.60999, y: 27.996902}
   m_SizeDelta: {x: -1184, y: 56}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9124377936306585331
@@ -10678,7 +10678,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3578661894986123084
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15743,7 +15743,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866406210918770408, guid: 10b68dfed1e702848b73784f7c51444f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -174.99994
+      value: -175
       objectReference: {fileID: 0}
     - target: {fileID: 6866406210918770408, guid: 10b68dfed1e702848b73784f7c51444f, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -17379,7 +17379,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6866406210918770408, guid: 10b68dfed1e702848b73784f7c51444f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -174.99994
+      value: -175
       objectReference: {fileID: 0}
     - target: {fileID: 6866406210918770408, guid: 10b68dfed1e702848b73784f7c51444f, type: 3}
       propertyPath: m_AnchoredPosition.y

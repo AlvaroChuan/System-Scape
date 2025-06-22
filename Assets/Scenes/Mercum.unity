@@ -136,8 +136,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 8253288669668673213, guid: bd8d56fefcd9897458e82ccf5cfbacfc, type: 3}
-      propertyPath: m_ConstrainProportionsScale
+    - target: {fileID: 9032759062761640669, guid: bd8d56fefcd9897458e82ccf5cfbacfc, type: 3}
+      propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9218895800546882361, guid: bd8d56fefcd9897458e82ccf5cfbacfc, type: 3}
@@ -829,7 +829,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1755973050008840104, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -174.99992
+      value: -174.99994
+      objectReference: {fileID: 0}
+    - target: {fileID: 2435383734385599873, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -169.60997
       objectReference: {fileID: 0}
     - target: {fileID: 4985441238070312595, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
       propertyPath: m_Camera
@@ -839,13 +843,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: HUD Manager
       objectReference: {fileID: 0}
+    - target: {fileID: 7439221756694028320, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8154116157839486800, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -174.99998
+      value: -175
       objectReference: {fileID: 0}
     - target: {fileID: 9191156100930629525, guid: 7288e01701f49b34c92ac1fa4bef716e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -174.99992
+      value: -174.99994
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

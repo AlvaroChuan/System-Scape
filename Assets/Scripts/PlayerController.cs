@@ -44,13 +44,18 @@ public class PlayerController : MonoBehaviour
     private bool usingDrill = false;
     private bool usingPad = false;
     private string currentPadMenu = "";
+    private Transform padOriginalParent;
     private Vector3 padOriginalPosition;
     private Vector3 padOriginalRotation;
+    [SerializeField] private Vector3 padTargetScale;
     private Coroutine padCoroutine;
     private bool lockOnTarget = false;
     private Enemy target;
     private bool canUseSpaceship = false;
     private Coroutine mountSpaceshipCoroutine;
+    private Animator animator;
+    [SerializeField] private GameObject rifle;
+    [SerializeField] private GameObject sword;
 
     private void Awake()
     {
@@ -61,6 +66,8 @@ public class PlayerController : MonoBehaviour
         mainCamera = Camera.main;
         padOriginalPosition = pad.transform.localPosition;
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
+        animator = GetComponent<Animator>();
+        padOriginalParent = pad.transform.parent;
     }
 
     private void OnEnable()
@@ -167,9 +174,10 @@ public class PlayerController : MonoBehaviour
         right.Normalize();
         moveDirection = Vector3.Normalize(forward * input.y + right * input.x);
         move = moveDirection != Vector3.zero;
+        animator.SetFloat("Speed", move ? 1 : 0);
 
         // Look input
-        if(usingPad) return;
+        if (usingPad) return;
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
         if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
@@ -186,6 +194,7 @@ public class PlayerController : MonoBehaviour
 
         // Handle jump
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
+        animator.SetBool("Grounded", canJump);
     }
 
     private void FixedUpdate()
@@ -204,14 +213,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
-        if(usingPad) return;
+        if (usingPad) return;
+        if (canJump) animator.SetTrigger("Jump");
         if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
         else if (!canJump && GameManager.instance.JetpackEnabled) usingJectpack = true;
     }
 
     private void OnEndJump(InputAction.CallbackContext context)
     {
-        if(usingPad) return;
+        if (usingPad) return;
         usingJectpack = false; // Stop using jetpack when jump is released
     }
 
@@ -219,7 +229,7 @@ public class PlayerController : MonoBehaviour
     {
         if (canUseSpaceship)
         {
-            if(mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
+            if (mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
             mountSpaceshipCoroutine = StartCoroutine(MountSpaceship());
             return;
         }
@@ -231,8 +241,10 @@ public class PlayerController : MonoBehaviour
                 if (GameManager.instance.drillableMaterials.Count <= 0) return;
                 usingDrill = true;
                 GameManager.instance.drillableMaterials[0].DrillMaterial();
+                animator.SetTrigger("Attack");
                 break;
             case 1:
+                if (canAttack) animator.SetTrigger("Attack");
                 if (canAttack) Slice();
                 break;
             case 2:
@@ -243,7 +255,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnEndInteract(InputAction.CallbackContext context)
     {
-        if(mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
+        if (mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
         switch (GameManager.instance.SelectedGadget)
         {
             case 0:
@@ -333,7 +345,7 @@ public class PlayerController : MonoBehaviour
             timeRemaining -= Time.deltaTime;
             yield return null;
         }
-        if(timeRemaining <= 0 && canUseSpaceship) GameManager.instance.LoadScene("Space");
+        if (timeRemaining <= 0 && canUseSpaceship) GameManager.instance.LoadScene("Space");
     }
 
     private IEnumerator Shoot()
@@ -347,6 +359,7 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < GameManager.instance.BulletsPerBurst; i++)
         {
             if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.TakeDamage(GameManager.instance.BulletDamage);
+            animator.SetTrigger("Attack");
             yield return new WaitForSeconds(0.1f);
         }
         lockOnTarget = false;
@@ -363,11 +376,13 @@ public class PlayerController : MonoBehaviour
     {
         if (toCamera)
         {
+            pad.transform.parent = mainCamera.transform;
             while (Vector3.Distance(pad.transform.position, mainCamera.transform.position + mainCamera.transform.forward * 0.5f) > 0.01f
                    || Quaternion.Angle(pad.transform.rotation, Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up)) > 1f)
             {
                 pad.transform.position = Vector3.Lerp(pad.transform.position, mainCamera.transform.position + mainCamera.transform.forward * 0.5f, 10 * Time.deltaTime);
                 pad.transform.rotation = Quaternion.Slerp(pad.transform.rotation, Quaternion.LookRotation(mainCamera.transform.forward, Vector3.up), 10 * Time.deltaTime);
+                pad.transform.localScale = Vector3.Lerp(pad.transform.localScale, padTargetScale, 10 * Time.deltaTime);
                 yield return null;
             }
             pad.transform.position = mainCamera.transform.position + mainCamera.transform.forward * 0.5f;
@@ -377,6 +392,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            pad.transform.parent = padOriginalParent;
             Time.timeScale = 1;
             HUDManager.instance.ToggleHUD(false, menu);
             while (Vector3.Distance(pad.transform.localPosition, padOriginalPosition) > 0.01f
@@ -384,10 +400,31 @@ public class PlayerController : MonoBehaviour
             {
                 pad.transform.localPosition = Vector3.Lerp(pad.transform.localPosition, padOriginalPosition, 10 * Time.deltaTime);
                 pad.transform.localRotation = Quaternion.Slerp(pad.transform.localRotation, Quaternion.Euler(padOriginalRotation), 10 * Time.deltaTime);
+                pad.transform.localScale = Vector3.Lerp(pad.transform.localScale, Vector3.one, 10 * Time.deltaTime);
                 yield return null;
             }
             pad.transform.localPosition = padOriginalPosition;
             pad.transform.localRotation = Quaternion.Euler(padOriginalRotation);
+        }
+    }
+
+    public void Damage()
+    {
+        animator.SetTrigger("Hit");
+    }
+
+    public void SetAnimTree(bool value)
+    {
+        animator.SetBool("Sword?", value);
+        if (value)
+        {
+            rifle.SetActive(false);
+            sword.SetActive(true);
+        }
+        else
+        {
+            rifle.SetActive(true);
+            sword.SetActive(false);
         }
     }
 }
