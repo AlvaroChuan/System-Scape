@@ -122,6 +122,7 @@ public class GameManager : MonoBehaviour
     public float solarSystemRotation;
     public float solarSystemStarSize = 100f;
     public string lastPlanet = "Mercum";
+    public bool goodEnding = false;
 
     private void Awake()
     {
@@ -129,7 +130,6 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
-            PrepareRun();
         }
         else Destroy(gameObject);
     }
@@ -139,12 +139,13 @@ public class GameManager : MonoBehaviour
         ResetVariables();
         StartCoroutine(OxygenManagement());
         StartCoroutine(SolarSystemManagement());
+        LoadScene("Mercum");
     }
 
     private void ResetVariables()
     {
         // Reset player stats for a new run
-        speed = 10f;
+        speed = 5f;
         jumpForce = 5f;
         jetpackForce = 15f;
         rotationSpeed = 10f;
@@ -176,6 +177,7 @@ public class GameManager : MonoBehaviour
         bismuth = 10000;
         platinum = 10000;
         petralact = 10000;
+        maxAmmountPerMaterial = 110;
 
         maxSpaceshipSpeed = 10f;
         spaceShipAcceleration = 5f;
@@ -195,15 +197,44 @@ public class GameManager : MonoBehaviour
         radarEnabled = false;
         enemyDetectionEnabled = false;
         flightCompanionEnabled = false;
+        enemiesInMaxRange.Clear();
+        drillableMaterials.Clear();
+        solarSystemRotation = 0f;
+        solarSystemStarSize = 100f;
+        lastPlanet = "Mercum";
+        goodEnding = false;
 
         // Reset upgrades
         foreach (Upgrade upgrade in upgrades) upgrade.Deactivate();
     }
 
-    private void EndRun()
+    public void EndRun(int reason)
     {
-        Debug.Log("Run ended. Player stats and upgrades will be reset.");
+        Time.timeScale = 1f;
         StopAllCoroutines();
+        switch (reason)
+        {
+            case 0: // Player died due to the sun
+                goodEnding = false;
+                HUDManager.instance.OpenPad();
+                break;
+            case 1: // Player died due to enemies
+                goodEnding = false;
+                HUDManager.instance.OpenPad();
+                break;
+            case 2: // Oxygen ran out
+                goodEnding = false;
+                HUDManager.instance.OpenPad();
+                break;
+            case 3: // Player quit
+                goodEnding = false;
+                HUDManager.instance.FadeOut("Main Menu");
+                break;
+            case 4: // Player completed the game
+                goodEnding = true;
+                HUDManager.instance.OpenPad();
+                break;
+        }
     }
 
     public void SwitchGadget(bool forward)
@@ -408,10 +439,10 @@ public class GameManager : MonoBehaviour
 
     public void DamagePlayer(int damage)
     {
-        PlayerController.instance.Damage();
+        if(SceneManager.GetActiveScene().name != "Space") PlayerController.instance.Damage();
         if (Random.Range(0, 1f) < reflectionChance) return; // Reflect damage if chance is met
         currentHP -= Mathf.Max(0, damage - (int)(damage * damageReduction)); // Apply damage reduction
-        if (currentHP <= 0) EndRun();
+        if (currentHP <= 0) EndRun(1);
         else
         {
             if (healthRegenCoroutine != null) StopCoroutine(healthRegenCoroutine);
@@ -424,41 +455,44 @@ public class GameManager : MonoBehaviour
         switch (materialName)
         {
             case "Iron":
-                if (iron < maxAmmountPerMaterial) iron++;
+                if (iron < maxAmmountPerMaterial) iron+=10;
                 break;
             case "Copper":
-                if (copper < maxAmmountPerMaterial) copper++;
+                if (copper < maxAmmountPerMaterial) copper+=10;
                 break;
             case "Magnetite":
-                if (magnetite < maxAmmountPerMaterial) magnetite++;
+                if (magnetite < maxAmmountPerMaterial) magnetite+=10;
                 break;
             case "Quartz":
-                if (quartz < maxAmmountPerMaterial) quartz++;
+                if (quartz < maxAmmountPerMaterial) quartz+=10;
                 break;
             case "Phobosite":
-                if (phobosite < maxAmmountPerMaterial) phobosite++;
+                if (phobosite < maxAmmountPerMaterial) phobosite+=10;
                 break;
             case "Radium":
-                if (radium < maxAmmountPerMaterial) radium++;
+                if (radium < maxAmmountPerMaterial) radium+=10;
                 break;
             case "Glaciate":
-                if (glaciate < maxAmmountPerMaterial) glaciate++;
+                if (glaciate < maxAmmountPerMaterial) glaciate+=10;
                 break;
             case "Bismuth":
-                if (bismuth < maxAmmountPerMaterial) bismuth++;
+                if (bismuth < maxAmmountPerMaterial) bismuth+=10;
                 break;
             case "Platinum":
-                if (platinum < maxAmmountPerMaterial) platinum++;
+                if (platinum < maxAmmountPerMaterial) platinum+=10;
                 break;
             case "Petralact":
-                if (petralact < maxAmmountPerMaterial) petralact++;
+                if (petralact < maxAmmountPerMaterial) petralact+=10;
                 break;
         }
     }
 
     public void LoadScene(string sceneName)
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene(sceneName);
+        HUDManager.instance.FadeIn();
+        if (sceneName == "Main Menu") HUDManager.instance.SetMainMenu();
+        HUDManager.instance.ToggleHUD(false, "Ending");
     }
 
     public void QuitGame()
@@ -466,13 +500,25 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void AttemptToScape()
+    {
+        if (landingGearTier < 5)
+        {
+            //TODO:
+        }
+        else
+        {
+            EndRun(4); // Player completed the game
+        }
+    }
+
     private IEnumerator OxygenManagement()
     {
         while (true)
         {
-            if(SceneManager.GetActiveScene().name != "Space") currentOxygen = regenerateOxygen ? Mathf.Min(currentOxygen + oxygenRegenAmmount, maxOxygen) : Mathf.Max(currentOxygen - oxygenUseRate, 0f);
+            if (SceneManager.GetActiveScene().name != "Space") currentOxygen = regenerateOxygen ? Mathf.Min(currentOxygen + oxygenRegenAmmount, maxOxygen) : Mathf.Max(currentOxygen - oxygenUseRate, 0f);
             yield return new WaitForSeconds(oxygenUseInterval);
-            if (currentOxygen <= 0f) EndRun(); // End run if oxygen runs out
+            if (currentOxygen <= 0f) EndRun(2);
         }
     }
 
@@ -493,6 +539,11 @@ public class GameManager : MonoBehaviour
             solarSystemRotation += Time.fixedDeltaTime * 0.25f;
             if (solarSystemRotation >= 360f) solarSystemRotation -= 360f;
             solarSystemStarSize += Time.fixedDeltaTime * 0.25f;
+            if (SceneManager.GetActiveScene().name == "Mercum" && solarSystemStarSize > 200) EndRun(0);
+            else if (SceneManager.GetActiveScene().name == "Colis" && solarSystemStarSize > 400) EndRun(3);
+            else if (SceneManager.GetActiveScene().name == "Phobos" && solarSystemStarSize > 600) EndRun(3);
+            else if (SceneManager.GetActiveScene().name == "Regio" && solarSystemStarSize > 800) EndRun(3);
+            else if (SceneManager.GetActiveScene().name == "Platum" && solarSystemStarSize > 1000) EndRun(3);
             yield return null;
         }
     }

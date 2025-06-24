@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -24,7 +25,7 @@ public class SpaceshipController : MonoBehaviour
     [SerializeField] private ParticleSystem rightEngine;
     [SerializeField] private ParticleSystem leftEngineBrake;
     [SerializeField] private ParticleSystem rightEngineBrake;
-
+    [SerializeField] private GameObject indicator;
 
     private bool usingPad = false;
     private Rigidbody rb;
@@ -37,6 +38,8 @@ public class SpaceshipController : MonoBehaviour
     public string nearPlanet = "";
     private Coroutine landingCoroutine;
     private float rotation;
+    private float originalTimeToLand = 3f;
+    public float TimeToLand;
 
     private void Awake()
     {
@@ -47,6 +50,7 @@ public class SpaceshipController : MonoBehaviour
         padOriginalPosition = pad.transform.localPosition;
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
         rb = gameObject.GetComponent<Rigidbody>();
+        TimeToLand = originalTimeToLand;
     }
 
     public void SetPosition()
@@ -165,6 +169,13 @@ public class SpaceshipController : MonoBehaviour
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
         if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
+        if (nearPlanet != "")
+        {
+            indicator.SetActive(true);
+            indicator.GetComponent<Indicator>().SetFillAmount((originalTimeToLand - TimeToLand) / originalTimeToLand * 100f);
+        }
+        else indicator.SetActive(false);
+        if (Vector3.Distance(rb.position, Vector3.zero) > 1050) nearPlanet = "Scape";
     }
 
     private void FixedUpdate()
@@ -183,7 +194,6 @@ public class SpaceshipController : MonoBehaviour
     {
         if (nearPlanet != "")
         {
-            Debug.Log("Landing on " + nearPlanet);
             if (landingCoroutine != null) StopCoroutine(landingCoroutine);
             landingCoroutine = StartCoroutine(LandOnPlanet());
         }
@@ -192,6 +202,8 @@ public class SpaceshipController : MonoBehaviour
     private void OnEndInteract(InputAction.CallbackContext context)
     {
         if (landingCoroutine != null) StopCoroutine(landingCoroutine);
+        indicator.GetComponent<Indicator>().SetFillAmount(0);
+        TimeToLand = originalTimeToLand;
     }
 
     public void OpenPad(string menu)
@@ -260,12 +272,21 @@ public class SpaceshipController : MonoBehaviour
 
     private IEnumerator LandOnPlanet()
     {
-        float timeRemaining = 3f;
-        while (timeRemaining > 0 && nearPlanet != "")
+        string[] planets = {"Mercum", "Colis", "Phobos", "Regio", "Platum", "Scape"};
+        TimeToLand = originalTimeToLand;
+        while (TimeToLand > 0 && nearPlanet != "")
         {
-            timeRemaining -= Time.deltaTime;
+            TimeToLand -= Time.deltaTime;
             yield return null;
         }
-        if(timeRemaining <= 0 && nearPlanet != "") GameManager.instance.LoadScene(nearPlanet);
+        if (TimeToLand <= 0 && nearPlanet != "" && nearPlanet != "" && Array.IndexOf(planets, nearPlanet) <= GameManager.instance.LandingGearTier) HUDManager.instance.FadeOut(nearPlanet);
+        else if (TimeToLand <= 0 && nearPlanet != "" && Array.IndexOf(planets, nearPlanet) > GameManager.instance.LandingGearTier)
+        {
+            //TODO
+        }
+        else if (TimeToLand <= 0 && nearPlanet == "Scape")
+        {
+            GameManager.instance.AttemptToScape();
+        }
     }
 }

@@ -6,8 +6,26 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Main Menu.unity
+    guid: 3b244ce655a41bb4b8bdcf317bfef885
+  - enabled: 1
     path: Assets/Scenes/Mercum.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Space.unity
+    guid: 1f4d04f50ff74f4499a051a1a7437714
+  - enabled: 1
+    path: Assets/Scenes/Phobos.unity
+    guid: 36f3219d86d7ac647808a11c43b40a16
+  - enabled: 1
+    path: Assets/Scenes/Colis.unity
+    guid: c339e2ec7c73fa648b0cacf48c8c3a42
+  - enabled: 1
+    path: Assets/Scenes/Platum.unity
+    guid: 435afd09a38cfbc478d71cc77ff5ed69
+  - enabled: 1
+    path: Assets/Scenes/Regio.unity
+    guid: 855c10f10f6d5094aa302e60d9dcb433
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

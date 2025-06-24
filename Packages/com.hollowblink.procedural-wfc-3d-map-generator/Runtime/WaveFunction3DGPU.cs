@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using Cell3DStruct = WFC3DMapGenerator.WFCStructs.Cell3DStruct;
 using Tile3DStruct = WFC3DMapGenerator.WFCStructs.Tile3DStruct;
+using UnityEngine.Rendering;
 
 namespace WFC3DMapGenerator
 {
@@ -106,15 +107,22 @@ namespace WFC3DMapGenerator
             shader.SetInt("gridDimensionsY", dimensionsY);
             shader.SetInt("gridDimensionsZ", dimensionsZ);
 
+            DispatchMap(1);
+
             // Generate each layer of the map starting from the bottom
-            for (int i = 1; i < dimensionsY - 1; i++)
+            void DispatchMap(int layer)
             {
                 // Loop until the grid is fully collapsed without any incomatibilities
-                if (stopGeneration) break;
-                int attempts = 0;
-                int[] incompatibilities = { 1 };
-                Vector3[] offsets = { new Vector3(0, i, 0), new Vector3(2, i, 0), new Vector3(0, i, 2), new Vector3(2, i, 2) };
-                while (incompatibilities[0] != 0 && !stopGeneration)
+                if (stopGeneration)
+                {
+                    finished = true;
+                    ReleaseMemory();
+                    ClearGeneration();
+                    return;
+                }
+                int[] incompatibilities = { 0 };
+                Vector3[] offsets = { new Vector3(0, layer, 0), new Vector3(2, layer, 0), new Vector3(0, layer, 2), new Vector3(2, layer, 2) };
+                void DispatchLayer()
                 {
                     outputBuffer.SetData(gridComponentsStructs);
                     stateBuffer.SetData(new int[] { 0 });
@@ -124,14 +132,26 @@ namespace WFC3DMapGenerator
                         shader.SetVector("offset", offset);
                         shader.Dispatch(shader.FindKernel("CSMain"), Mathf.CeilToInt((float)dimensionsX / 10), 1, Mathf.CeilToInt((float)dimensionsZ / 10));
                     }
-                    stateBuffer.GetData(incompatibilities);
-                    attempts++;
+                    AsyncGPUReadback.Request(outputBuffer, (request) =>
+                    {
+                        incompatibilities = request.GetData<int>().ToArray();
+                        if (incompatibilities[0] != 0) DispatchLayer();
+                        else if (layer < dimensionsY - 1)
+                        {
+                            outputBuffer.GetData(gridComponentsStructs);
+                            DispatchMap(layer++);
+                        }
+                        else
+                        {
+                            finished = true;
+                            outputBuffer.GetData(gridComponentsStructs);
+                            InstantiateChunk();
+                            ClearHierarchy();
+                            ReleaseMemory();
+                        }
+                    });
                 }
-                outputBuffer.GetData(gridComponentsStructs);
             }
-            InstantiateChunk();
-            ClearGeneration();
-            ReleaseMemory();
         }
 
         /// <summary>
@@ -183,8 +203,11 @@ namespace WFC3DMapGenerator
                 Transform child = gameObject.transform.GetChild(i);
                 if (child.childCount != 0)
                 {
-                    child.GetChild(0).transform.parent = gameObject.transform;
-                    if (child.gameObject.name.Contains("Cell")) trash.Add(child.gameObject);
+                    if(child.gameObject.name.Contains("Cell"))
+                    {
+                        child.GetChild(0).parent = gameObject.transform;
+                        trash.Add(child.gameObject);
+                    }
                 }
             }
             foreach (GameObject obj in trash) DestroyImmediate(obj);
@@ -268,12 +291,11 @@ namespace WFC3DMapGenerator
                 UnityEditor.EditorUtility.CopySerialized(component, newComponent);
             }
 
-            foreach(GameObject child in tile.gameObject.GetComponentsInChildren<GameObject>())
+            for(int i = 0; i < tile.gameObject.transform.childCount; i++)
             {
+                Transform child = tile.gameObject.transform.GetChild(i);
                 if (child == tile.gameObject) continue;
-                GameObject newChild = Instantiate(child, newTile.transform);
-                newChild.name = child.name + nameVariation;
-                newChild.SetActive(false);
+                GameObject newChild = Instantiate(child.gameObject, newTile.transform);
             }
 
             return tileRotated;

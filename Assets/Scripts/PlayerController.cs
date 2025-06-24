@@ -51,7 +51,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Vector3 padTargetScale;
     private Coroutine padCoroutine;
     private bool lockOnTarget = false;
-    private Enemy target;
+    private GameObject target;
     private bool canUseSpaceship = false;
     private Coroutine mountSpaceshipCoroutine;
     private Animator animator;
@@ -63,7 +63,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject rifleBurst;
     [SerializeField] private LineRenderer drillLine;
     [SerializeField] private LineRenderer oxygenLine;
+    [SerializeField] private GameObject indicator;
     private GameObject oxygenOrigin;
+    private float originalTimeMountSpaceship = 3f;
+    private float timeMountSpaceship;
+    [SerializeField] private GameObject spaceship;
 
     private void Awake()
     {
@@ -76,6 +80,7 @@ public class PlayerController : MonoBehaviour
         padOriginalRotation = pad.transform.localRotation.eulerAngles;
         animator = GetComponent<Animator>();
         padOriginalParent = pad.transform.parent;
+        timeMountSpaceship = originalTimeMountSpaceship;
     }
 
     private void OnEnable()
@@ -204,14 +209,31 @@ public class PlayerController : MonoBehaviour
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
         animator.SetBool("Grounded", canJump);
 
-        // Handle drill usage
-        if (usingDrill && GameManager.instance.drillableMaterials.Count > 0)
+        if (GameManager.instance.drillableMaterials.Count > 0)
         {
-            drillLine.enabled = true;
-            drillLine.SetPosition(0, drillLine.transform.position);
-            drillLine.SetPosition(1, GameManager.instance.drillableMaterials[0].transform.position);
+            indicator.SetActive(true);
+            indicator.transform.position = GameManager.instance.drillableMaterials[0].transform.position;
+            indicator.GetComponent<Indicator>().SetFillAmount(GameManager.instance.drillableMaterials[0].GetDrillTime());
         }
-        else drillLine.enabled = false;
+        else if (canUseSpaceship)
+        {
+            indicator.SetActive(true);
+            indicator.transform.position = spaceship.transform.position + Vector3.up * 0.5f; // Position above the spaceship
+            indicator.GetComponent<Indicator>().SetFillAmount((originalTimeMountSpaceship - timeMountSpaceship) / originalTimeMountSpaceship * 100f); // Full indicator for spaceship
+        }
+        else
+        {
+            indicator.SetActive(false);
+        }
+
+        // Handle drill usage
+            if (usingDrill && GameManager.instance.drillableMaterials.Count > 0)
+            {
+                drillLine.enabled = true;
+                drillLine.SetPosition(0, drillLine.transform.position);
+                drillLine.SetPosition(1, GameManager.instance.drillableMaterials[0].transform.position);
+            }
+            else drillLine.enabled = false;
 
         // Handle oxygen regeneration
         if (gettingOxygen)
@@ -262,6 +284,7 @@ public class PlayerController : MonoBehaviour
     {
         if (canUseSpaceship)
         {
+            indicator.GetComponent<Indicator>().SetFillAmount(0);
             if (mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
             mountSpaceshipCoroutine = StartCoroutine(MountSpaceship());
             return;
@@ -275,6 +298,8 @@ public class PlayerController : MonoBehaviour
                 usingDrill = true;
                 GameManager.instance.drillableMaterials[0].DrillMaterial();
                 animator.SetTrigger("Attack");
+                target = GameManager.instance.drillableMaterials[0].gameObject;
+                lockOnTarget = true;
                 break;
             case 1:
                 if (canAttack) animator.SetTrigger("Attack");
@@ -288,14 +313,20 @@ public class PlayerController : MonoBehaviour
 
     private void OnEndInteract(InputAction.CallbackContext context)
     {
-        if (mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
-        switch (GameManager.instance.SelectedGadget)
+        if (mountSpaceshipCoroutine != null)
         {
-            case 0:
-                usingDrill = false;
-                if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
-                break;
+            StopCoroutine(mountSpaceshipCoroutine);
+            indicator.GetComponent<Indicator>().SetFillAmount(0);
+            timeMountSpaceship = originalTimeMountSpaceship; // Reset mount time
         }
+        switch (GameManager.instance.SelectedGadget)
+            {
+                case 0:
+                    usingDrill = false;
+                    lockOnTarget = false;
+                    if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
+                    break;
+            }
     }
 
     private void OnNextGadget(InputAction.CallbackContext context)
@@ -363,9 +394,9 @@ public class PlayerController : MonoBehaviour
         List<Enemy> enemiesInRange = GameManager.instance.enemiesInMaxRange;
         if (enemiesInRange.Count <= 0) return;
         enemiesInRange.OrderBy(e => Vector3.Distance(transform.position, e.transform.position));
-        target = enemiesInRange[0];
+        target = enemiesInRange[0].gameObject;
         lockOnTarget = true;
-        if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimSwordRange) target.TakeDamage(GameManager.instance.SwordDamage);
+        if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimSwordRange) target.GetComponent<Enemy>().TakeDamage(GameManager.instance.SwordDamage);
         StartCoroutine(AttackCooldown());
     }
 
@@ -377,13 +408,14 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator MountSpaceship()
     {
-        float timeRemaining = 3f;
-        while (timeRemaining > 0 && canUseSpaceship)
+        timeMountSpaceship = originalTimeMountSpaceship;
+        while (timeMountSpaceship > 0 && canUseSpaceship)
         {
-            timeRemaining -= Time.deltaTime;
+            timeMountSpaceship -= Time.deltaTime;
             yield return null;
         }
-        if (timeRemaining <= 0 && canUseSpaceship) GameManager.instance.LoadScene("Space");
+        if (timeMountSpaceship <= 0 && canUseSpaceship && GameManager.instance.LandingGearTier > 0) HUDManager.instance.FadeOut("Space");
+        else if (timeMountSpaceship <= 0 && canUseSpaceship && GameManager.instance.LandingGearTier <= 0) { } //TODO
     }
 
     private IEnumerator Shoot()
@@ -392,11 +424,11 @@ public class PlayerController : MonoBehaviour
         List<Enemy> enemiesInRange = GameManager.instance.enemiesInMaxRange;
         if (enemiesInRange.Count <= 0) yield break;
         enemiesInRange.OrderBy(e => Vector3.Distance(transform.position, e.transform.position));
-        target = enemiesInRange[0];
+        target = enemiesInRange[0].gameObject;
         lockOnTarget = true;
         for (int i = 0; i < GameManager.instance.BulletsPerBurst; i++)
         {
-            if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.TakeDamage(GameManager.instance.BulletDamage);
+            if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.GetComponent<Enemy>().TakeDamage(GameManager.instance.BulletDamage);
             animator.SetTrigger("Attack");
             rifleBurst.SetActive(true);
             yield return new WaitForSeconds(0.25f);

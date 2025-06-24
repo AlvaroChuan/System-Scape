@@ -4,11 +4,28 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System;
+using UnityEngine.Playables;
 
 public class HUDManager : MonoBehaviour
 {
     // Singleton
     public static HUDManager instance;
+
+    [Header("Main Menu HUD")]
+    [SerializeField] private GameObject MainMenuHUD;
+    [SerializeField] private Button playButton; // Reference to set as the selected button for the event system
+    [SerializeField] private Button nextButton1;
+    [SerializeField] private Button nextButton2;
+    [SerializeField] private Button nextButton3;
+    [SerializeField] private Button backButton1;
+    [SerializeField] private GameObject optionsPanel;
+    [SerializeField] private Slider musicSlider2;
+    [SerializeField] private Slider sfxSlider2;
+    [SerializeField] private GameObject mainMenuPanel;
+    [SerializeField] private GameObject storyPanel;
+    [SerializeField] private GameObject controlsPanel;
+    [SerializeField] private GameObject storyPanel2;
 
     [Header("Pause HUD")]
     [SerializeField] private GameObject PauseHUD;
@@ -59,22 +76,48 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private TMP_Text petralactAmountText;
     [SerializeField] private Image petralactFillImage;
 
+    [Header("Ending HUD")]
+    [SerializeField] private GameObject endingHUD;
+    [SerializeField] private GameObject goodEndingPanel;
+    [SerializeField] private GameObject badEndingPanel;
+    [SerializeField] private Button goodEndingButton;
+    [SerializeField] private Button badEndingButton;
+
     [Header("Selection Rect")]
     [SerializeField] private Image selectionRect;
+
+    [Header("Fade In / Out")]
+    [SerializeField] private Animator fadeAnimator;
 
 
     private GameObject currentPanel;
     private int currentSubPanelIndex = 0;
     private bool onUI = false;
+    private string nextSceneName = "";
 
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            if (SceneManager.GetActiveScene().name == "Main Menu")
+            {
+                ToggleHUD(false, "Pause");
+                ToggleHUD(false, "Upgrades");
+                ToggleHUD(true, "Main Menu");
+            }
             DontDestroyOnLoad(gameObject);
         }
-        else Destroy(gameObject);
+        else
+        {
+            if (SceneManager.GetActiveScene().name == "Main Menu")
+            {
+                HUDManager.instance.ToggleHUD(false, "Pause");
+                HUDManager.instance.ToggleHUD(false, "Upgrades");
+                HUDManager.instance.ToggleHUD(true, "Main Menu");
+            }
+            Destroy(gameObject);
+        }
     }
 
     private void Update()
@@ -131,6 +174,7 @@ public class HUDManager : MonoBehaviour
     {
         UpgradesHUD.SetActive(false);
         PauseHUD.SetActive(false);
+        MainMenuHUD.SetActive(false);
         switch (type)
         {
             case "Upgrades":
@@ -140,9 +184,31 @@ public class HUDManager : MonoBehaviour
                 break;
             case "Pause":
                 PauseHUD.SetActive(state);
-                musicSlider.value = SoundManager.instance.GetMusicVolume();
-                sfxSlider.value = SoundManager.instance.GetSFXVolume();
+                if (state) musicSlider.value = SoundManager.instance.GetMusicVolume();
+                if (state) sfxSlider.value = SoundManager.instance.GetSFXVolume();
                 if (state) EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+                break;
+            case "Main Menu":
+                MainMenuHUD.SetActive(state);
+                if (state) EventSystem.current.SetSelectedGameObject(playButton.gameObject);
+                break;
+            case "Ending":
+                endingHUD.SetActive(state);
+                if (state)
+                {
+                    if (GameManager.instance.goodEnding)
+                    {
+                        goodEndingPanel.SetActive(true);
+                        badEndingPanel.SetActive(false);
+                        EventSystem.current.SetSelectedGameObject(goodEndingButton.gameObject);
+                    }
+                    else
+                    {
+                        goodEndingPanel.SetActive(false);
+                        badEndingPanel.SetActive(true);
+                        EventSystem.current.SetSelectedGameObject(badEndingButton.gameObject);
+                    }
+                }
                 break;
         }
         onUI = state;
@@ -213,6 +279,18 @@ public class HUDManager : MonoBehaviour
         else if (result == 3) Debug.Log("Not enough resources to purchase upgrade: " + upgrade.upgradeName);
     }
 
+    public void BackToMainMenu()
+    {
+        GameManager.instance.EndRun(3);
+    }
+
+    public void SetMainMenu()
+    {
+        ToggleHUD(false, "Pause");
+        ToggleHUD(false, "Upgrades");
+        ToggleHUD(true, "Main Menu");
+    }
+
     public void OpenOptionsPanel()
     {
         pausePanel.SetActive(false);
@@ -221,11 +299,35 @@ public class HUDManager : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(backButton.gameObject);
     }
 
+    public void OpenOptionsPanelFromMainMenu()
+    {
+        optionsPanel.SetActive(true);
+        mainMenuPanel.SetActive(false);
+        musicSlider2.value = SoundManager.instance.GetMusicVolume();
+        sfxSlider2.value = SoundManager.instance.GetSFXVolume();
+        EventSystem.current.SetSelectedGameObject(backButton1.gameObject);
+    }
+
     public void CloseOptionsPanel()
     {
         pausePanel.SetActive(true);
         settingsPanel.SetActive(false);
         tabText.text = "Pause Menu";
+        EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+    }
+
+    public void CloseOptionsPanelFromMainMenu()
+    {
+        optionsPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(playButton.gameObject);
+    }
+
+    public void OpenPad()
+    {
+        if (SceneManager.GetActiveScene().name != "Space") PlayerController.instance.OpenPad("Ending");
+        else SpaceshipController.instance.OpenPad("Ending");
+        ToggleHUD(true, "Ending");
         EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
     }
 
@@ -251,8 +353,42 @@ public class HUDManager : MonoBehaviour
         GameManager.instance.QuitGame();
     }
 
+    public void NextStoryPanel(GameObject nextPanel)
+    {
+        GameObject[] panels = new GameObject[] { storyPanel, controlsPanel, storyPanel2, mainMenuPanel };
+        Button[] nextButtons = new Button[] { nextButton1, nextButton2, nextButton3 };
+        foreach (GameObject panel in panels) panel.SetActive(false);
+        if (nextPanel == mainMenuPanel)
+        {
+            PlayableDirector director = GameObject.Find("Director").GetComponent<PlayableDirector>();
+            director.Play();
+            mainMenuPanel.SetActive(true);
+            ToggleHUD(false, "Main Menu");
+            return;
+        }
+        nextPanel.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(nextButtons[Array.IndexOf(panels, nextPanel)].gameObject);
+    }
+
     public void SetTargetCamera(Camera cam)
     {
         gameObject.GetComponent<Canvas>().worldCamera = cam;
+    }
+
+    public void FadeOut(string sceneName)
+    {
+        nextSceneName = sceneName;
+        fadeAnimator.SetTrigger("FadeOut");
+    }
+
+    public void FadeIn()
+    {
+        fadeAnimator.SetTrigger("FadeIn");
+    }
+
+    public void OnFadeOutFinished()
+    {
+        if (SceneManager.GetActiveScene().name != "Main Menu") GameManager.instance.LoadScene(nextSceneName);
+        else GameManager.instance.PrepareRun();
     }
 }

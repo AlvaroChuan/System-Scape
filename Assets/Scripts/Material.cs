@@ -9,9 +9,11 @@ public class Material : MonoBehaviour
     public string MaterialName => materialName;
     [SerializeField] private float drillTime = 3f;
     private Coroutine drillCoroutine;
+    private float originalDrillTime = 3f;
 
     public void DrillMaterial()
     {
+        originalDrillTime = drillTime; // Store the original drill time
         if (GameManager.instance.DrillGadgetTier < materialTier) return;
         if (drillCoroutine != null) StopCoroutine(drillCoroutine);
         drillCoroutine = StartCoroutine(DrillCoroutine());
@@ -25,7 +27,6 @@ public class Material : MonoBehaviour
             drillCoroutine = null;
         }
         drillTime = 3f; // Reset drill time
-        Debug.Log("Drilling stopped.");
     }
 
     private IEnumerator DrillCoroutine()
@@ -38,5 +39,10 @@ public class Material : MonoBehaviour
         GameManager.instance.AddMaterial(materialName);
         GameManager.instance.drillableMaterials.Remove(this);
         Destroy(gameObject);
+    }
+
+    public float GetDrillTime()
+    {
+        return (originalDrillTime - drillTime) / originalDrillTime * 100f;
     }
 }
