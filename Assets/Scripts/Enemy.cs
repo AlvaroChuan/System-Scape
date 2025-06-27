@@ -27,7 +27,7 @@ public class Enemy : MonoBehaviour
     {
         if (!isAlive) return;
 
-        healthIndicator.SetFillAmount((health - amount) / 100 * 100);
+        healthIndicator.SetFillAmount((health - amount) / health * 100);
         transform.DOPunchScale(new Vector3(0.1f, 0.1f, 0.1f), 0.2f, 10, 0.5f);
         SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Hit);
 

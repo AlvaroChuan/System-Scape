@@ -343,7 +343,7 @@ public class PlayerController : MonoBehaviour
             case 0:
                 usingDrill = false;
                 lockOnTarget = false;
-                if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
+                if (GameManager.instance.drillableMaterials.Count > 0 && GameManager.instance.drillableMaterials[0] != null) GameManager.instance.drillableMaterials[0].StopDrilling();
                 break;
         }
     }
