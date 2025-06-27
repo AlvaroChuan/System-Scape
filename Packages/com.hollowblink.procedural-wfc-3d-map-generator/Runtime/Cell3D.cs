@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     public class Cell3D : MonoBehaviour
@@ -26,3 +24,4 @@ namespace WFC3DMapGenerator
         }
     }
 }
+#endif

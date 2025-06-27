@@ -48,9 +48,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicSource: {fileID: 7717747571433119903}
   sfxSource: {fileID: 1623159115657436914}
-  musicClips: []
+  musicClips:
+  - clip: 17
+    soundFile: {fileID: 8300000, guid: 669260a89a4692c41809d884a5453afe, type: 3}
+  - clip: 18
+    soundFile: {fileID: 8300000, guid: 2efdb0878dcc30842a9c640f7deecff5, type: 3}
+  - clip: 19
+    soundFile: {fileID: 8300000, guid: fa6cc0a6e07f1eb44b6e5cdc91239d29, type: 3}
+  - clip: 20
+    soundFile: {fileID: 8300000, guid: 0f1d243e70596394782dfa79a564785f, type: 3}
+  - clip: 21
+    soundFile: {fileID: 8300000, guid: f6f33e8324afedc43865a24c6ec1165a, type: 3}
+  - clip: 22
+    soundFile: {fileID: 8300000, guid: 3b646932253d22a4a9fd65254554f00d, type: 3}
+  - clip: 23
+    soundFile: {fileID: 8300000, guid: f37db90b4049e4248a53684d787e271c, type: 3}
   mixer: {fileID: 24100000, guid: b0a92ef7f67a00b4a8050db167a8d405, type: 2}
-  sfxClips: []
+  sfxClips:
+  - clip: 0
+    soundFile: {fileID: 8300000, guid: 1cb8b0c670b46974e94eaf5618842fd9, type: 3}
+  - clip: 2
+    soundFile: {fileID: 8300000, guid: 903a1adfed24cb840983f22609d6a48b, type: 3}
+  - clip: 3
+    soundFile: {fileID: 8300000, guid: d18045589731d934babc590fb6175bec, type: 3}
+  - clip: 4
+    soundFile: {fileID: 8300000, guid: e8e5e6672ce5ca449a53d2f28ba46186, type: 3}
+  - clip: 5
+    soundFile: {fileID: 8300000, guid: e446b7f3fa2ca814a8aa0c9eb210a4cb, type: 3}
+  - clip: 6
+    soundFile: {fileID: 8300000, guid: 88c7f186cebbd694eb5cfad78189680f, type: 3}
+  - clip: 7
+    soundFile: {fileID: 8300000, guid: d633d6110ca67824f88666a076dc1ec2, type: 3}
+  - clip: 8
+    soundFile: {fileID: 8300000, guid: 13f84a1bc5a7e4b49b2d18bb7e0a299c, type: 3}
+  - clip: 1
+    soundFile: {fileID: 8300000, guid: b846e39fde07fa5468b8d4c33783de5d, type: 3}
+  - clip: 9
+    soundFile: {fileID: 8300000, guid: 8a42d914d59e44344aef63fcf9f18bcf, type: 3}
+  - clip: 10
+    soundFile: {fileID: 8300000, guid: 2750a229016440544a5eebf574805885, type: 3}
+  - clip: 11
+    soundFile: {fileID: 8300000, guid: 1b271f4b10082884a901a946ce8c3817, type: 3}
+  - clip: 12
+    soundFile: {fileID: 8300000, guid: 495d6a695e24a054da1de2848bed2864, type: 3}
+  - clip: 13
+    soundFile: {fileID: 8300000, guid: 5469b6e84967c8642852d2207e46c029, type: 3}
+  - clip: 16
+    soundFile: {fileID: 8300000, guid: 4068f07d7f270ae459cb5bc06e6dc1c4, type: 3}
+  - clip: 14
+    soundFile: {fileID: 8300000, guid: 04a2336d4ae071c46a11325ae90c4eea, type: 3}
+  - clip: 15
+    soundFile: {fileID: 8300000, guid: 8743ab174fc27b74b84285d587252254, type: 3}
 --- !u!82 &7717747571433119903
 AudioSource:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -68,6 +69,8 @@ public class PlayerController : MonoBehaviour
     private float originalTimeMountSpaceship = 3f;
     private float timeMountSpaceship;
     [SerializeField] private GameObject spaceship;
+    private bool footstepsEnabled = false;
+    private Coroutine footstepsCoroutine;
 
     private void Awake()
     {
@@ -191,8 +194,20 @@ public class PlayerController : MonoBehaviour
 
         // Look input
         if (usingPad) return;
+        if (move && canJump && !footstepsEnabled && !usingPad)
+        {
+            footstepsEnabled = true;
+            if (footstepsCoroutine != null) StopCoroutine(footstepsCoroutine);
+            footstepsCoroutine = StartCoroutine(FootstepsCoroutine());
+        }
+        else if ((!move && canJump && footstepsEnabled) || !canJump || usingPad)
+        {
+            footstepsEnabled = false;
+            if (footstepsCoroutine != null) StopCoroutine(footstepsCoroutine);
+        }
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
-        if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
+        if (lookInput != Vector2.zero && Input.GetMouseButton(1) && lookAction.activeControl != null && lookAction.activeControl.device.name.Contains("Mouse")) cameraController.RotateCamera(lookInput.x * 0.33f);
+        else if (lookInput != Vector2.zero && lookAction.activeControl != null && !lookAction.activeControl.device.name.Contains("Mouse") && !Input.GetMouseButton(1)) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
 
         // Rotate player model towards movement direction
@@ -209,11 +224,11 @@ public class PlayerController : MonoBehaviour
         canJump = Physics.Raycast(transform.position + new Vector3(0, 0.05f, 0), Vector3.down, 0.15f);
         animator.SetBool("Grounded", canJump);
 
-        if (GameManager.instance.drillableMaterials.Count > 0)
+        if (GameManager.instance.drillableMaterials.Count > 0 && GameManager.instance.SelectedGadget == 0)
         {
-            indicator.SetActive(true);
-            indicator.transform.position = GameManager.instance.drillableMaterials[0].transform.position;
-            indicator.GetComponent<Indicator>().SetFillAmount(GameManager.instance.drillableMaterials[0].GetDrillTime());
+            if (GameManager.instance.drillableMaterials[0] != null) indicator.SetActive(true);
+            if (GameManager.instance.drillableMaterials[0] != null) indicator.transform.position = GameManager.instance.drillableMaterials[0].transform.position;
+            if (GameManager.instance.drillableMaterials[0] != null) indicator.GetComponent<Indicator>().SetFillAmount(GameManager.instance.drillableMaterials[0].GetDrillTime());
         }
         else if (canUseSpaceship)
         {
@@ -227,13 +242,13 @@ public class PlayerController : MonoBehaviour
         }
 
         // Handle drill usage
-            if (usingDrill && GameManager.instance.drillableMaterials.Count > 0)
-            {
-                drillLine.enabled = true;
-                drillLine.SetPosition(0, drillLine.transform.position);
-                drillLine.SetPosition(1, GameManager.instance.drillableMaterials[0].transform.position);
-            }
-            else drillLine.enabled = false;
+        if (usingDrill && GameManager.instance.drillableMaterials.Count > 0)
+        {
+            drillLine.enabled = true;
+            drillLine.SetPosition(0, drillLine.transform.position);
+            drillLine.SetPosition(1, GameManager.instance.drillableMaterials[0].transform.position);
+        }
+        else drillLine.enabled = false;
 
         // Handle oxygen regeneration
         if (gettingOxygen)
@@ -247,7 +262,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!canMove)
+        if (!canMove || usingPad)
         {
             rb.linearVelocity = Vector3.zero;
             return;
@@ -266,6 +281,7 @@ public class PlayerController : MonoBehaviour
         if (canJump) rb.AddForce(Vector3.up * GameManager.instance.JumpForce, ForceMode.Impulse);
         else if (!canJump && GameManager.instance.JetpackEnabled)
         {
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Jetpack, true);
             usingJetpack = true;
             jetpackParticles1.Play();
             jetpackParticles2.Play();
@@ -276,6 +292,7 @@ public class PlayerController : MonoBehaviour
     {
         if (usingPad) return;
         usingJetpack = false; // Stop using jetpack when jump is released
+        SoundManager.instance.StopSfx(SoundManager.ClipEnum.Jetpack);
         jetpackParticles1.Stop();
         jetpackParticles2.Stop();
     }
@@ -284,6 +301,7 @@ public class PlayerController : MonoBehaviour
     {
         if (canUseSpaceship)
         {
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.LoadingBar);
             indicator.GetComponent<Indicator>().SetFillAmount(0);
             if (mountSpaceshipCoroutine != null) StopCoroutine(mountSpaceshipCoroutine);
             mountSpaceshipCoroutine = StartCoroutine(MountSpaceship());
@@ -300,6 +318,7 @@ public class PlayerController : MonoBehaviour
                 animator.SetTrigger("Attack");
                 target = GameManager.instance.drillableMaterials[0].gameObject;
                 lockOnTarget = true;
+                SoundManager.instance.PlaySfx(SoundManager.ClipEnum.LoadingBar);
                 break;
             case 1:
                 if (canAttack) animator.SetTrigger("Attack");
@@ -320,13 +339,13 @@ public class PlayerController : MonoBehaviour
             timeMountSpaceship = originalTimeMountSpaceship; // Reset mount time
         }
         switch (GameManager.instance.SelectedGadget)
-            {
-                case 0:
-                    usingDrill = false;
-                    lockOnTarget = false;
-                    if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
-                    break;
-            }
+        {
+            case 0:
+                usingDrill = false;
+                lockOnTarget = false;
+                if (GameManager.instance.drillableMaterials.Count > 0) GameManager.instance.drillableMaterials[0].StopDrilling();
+                break;
+        }
     }
 
     private void OnNextGadget(InputAction.CallbackContext context)
@@ -365,6 +384,7 @@ public class PlayerController : MonoBehaviour
     {
         canMove = false;
         currentPadMenu = menu;
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.OpenPad);
         if (usingPad) HUDManager.instance.ToggleHUD(true, menu);
         else
         {
@@ -376,6 +396,7 @@ public class PlayerController : MonoBehaviour
 
     public void ClosePad(string menu)
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.ClosePad);
         canMove = true;
         if (padCoroutine != null) StopCoroutine(padCoroutine);
         padCoroutine = StartCoroutine(MovePadToTarget(false, menu));
@@ -390,6 +411,7 @@ public class PlayerController : MonoBehaviour
 
     private void Slice()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Sword);
         canAttack = false;
         List<Enemy> enemiesInRange = GameManager.instance.enemiesInMaxRange;
         if (enemiesInRange.Count <= 0) return;
@@ -402,6 +424,7 @@ public class PlayerController : MonoBehaviour
 
     public void SetOxygenOrigin(bool state, GameObject origin = null)
     {
+        if (state) SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Oxygen);
         oxygenOrigin = origin;
         gettingOxygen = state;
     }
@@ -415,7 +438,7 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
         if (timeMountSpaceship <= 0 && canUseSpaceship && GameManager.instance.LandingGearTier > 0) HUDManager.instance.FadeOut("Space");
-        else if (timeMountSpaceship <= 0 && canUseSpaceship && GameManager.instance.LandingGearTier <= 0) { } //TODO
+        else if (timeMountSpaceship <= 0 && canUseSpaceship && GameManager.instance.LandingGearTier <= 0) SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Prohibited, false, 2f);
     }
 
     private IEnumerator Shoot()
@@ -431,6 +454,7 @@ public class PlayerController : MonoBehaviour
             if (target != null && Vector3.Distance(transform.position, target.transform.position) <= GameManager.instance.AimRangeRifle) target.GetComponent<Enemy>().TakeDamage(GameManager.instance.BulletDamage);
             animator.SetTrigger("Attack");
             rifleBurst.SetActive(true);
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Rifle);
             yield return new WaitForSeconds(0.25f);
             rifleBurst.SetActive(false);
             yield return null;
@@ -484,6 +508,7 @@ public class PlayerController : MonoBehaviour
 
     public void Damage()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Hit);
         animator.SetTrigger("Hit");
     }
 
@@ -493,5 +518,14 @@ public class PlayerController : MonoBehaviour
         rifle.SetActive(selectedGadget == 2);
         sword.SetActive(selectedGadget == 1);
         drill.SetActive(selectedGadget == 0);
+    }
+
+    private IEnumerator FootstepsCoroutine()
+    {
+        while (footstepsEnabled)
+        {
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Footsteps);
+            yield return new WaitForSeconds(0.35f);
+        }
     }
 }

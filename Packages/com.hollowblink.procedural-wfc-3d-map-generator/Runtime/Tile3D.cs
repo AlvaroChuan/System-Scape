@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     public class Tile3D : MonoBehaviour
@@ -57,3 +57,4 @@ namespace WFC3DMapGenerator
         public Socket belowSocket;
     }
 }
+#endif

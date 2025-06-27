@@ -8,9 +8,30 @@ public class SoundManager : MonoBehaviour
 {
     public enum ClipEnum
     {
-        Button,
+        ClosePad,
+        OpenPad,
+        CRT,
+        FadeIn,
+        FadeOut,
+        Hit,
+        Jetpack,
+        LoadingBar,
+        MaterailBreak,
+        Oxygen,
+        Prohibited,
+        SpaceShipEngine,
+        Sword,
+        Upgrade,
+        Rifle,
         Footsteps,
+        Interface,
         MainTheme,
+        MercumTheme,
+        ColisTheme,
+        PhobosTheme,
+        RegioTheme,
+        PlatumTheme,
+        SpaceTheme,
     }
 
 
@@ -36,18 +57,33 @@ public class SoundManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            DontDestroyOnLoad(gameObject);
             InitializeDictionaries();
 
-			//SaveSystem.LoadData();
-			//SetMusicVolume(SaveSystem.saveData.musicVolume);
-			//SetSfxVolume(SaveSystem.saveData.sfxVolume);
+            if (PlayerPrefs.HasKey("musicVolume")) LoadMusicVolume();
+            else SetMusicVolume(1f);
 
-			//PlayMusic(ClipEnum.MainTheme);
+            if (PlayerPrefs.HasKey("sfxVolume")) LoadSFXVolume();
+            else SetSfxVolume(1f);
+
+            PlayMusic(ClipEnum.MainTheme);
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    private void LoadMusicVolume()
+    {
+        float volume = PlayerPrefs.GetFloat("musicVolume", 1f);
+        SetMusicVolume(volume);
+    }
+
+    private void LoadSFXVolume()
+    {
+        float volume = PlayerPrefs.GetFloat("sfxVolume", 1f);
+        SetSfxVolume(volume);
     }
 
     private void InitializeDictionaries()
@@ -56,25 +92,37 @@ public class SoundManager : MonoBehaviour
         foreach (var clip in sfxClips) _sfxDictionary[clip.clip] = clip.soundFile;
     }
 
-    public void PlayMusic(ClipEnum clip, bool loop = true)
+    public void PlayMusic(ClipEnum clip, bool loop = true, float volume = 1f)
     {
         if (_musicDictionary.TryGetValue(clip, out var sound))
         {
             musicSource.clip = sound;
             musicSource.loop = loop;
+            musicSource.volume = volume;
             musicSource.Play();
         }
         else Debug.LogWarning($"Music clip '{clip}' not found!");
     }
 
-    public void PlaySfx(ClipEnum clip)
+    public void PlaySfx(ClipEnum clip, bool loop = false, float volume = 1f)
     {
         if (_sfxDictionary.TryGetValue(clip, out var sound))
         {
-            AudioSource newSource = gameObject.AddComponent<AudioSource>();
-            newSource.outputAudioMixerGroup = sfxSource.outputAudioMixerGroup;
-            newSource.PlayOneShot(sound);
-            StartCoroutine(DestroySource(newSource, sound.length));
+            if (!loop)
+            {
+                AudioSource newSource = gameObject.AddComponent<AudioSource>();
+                newSource.outputAudioMixerGroup = sfxSource.outputAudioMixerGroup;
+                newSource.PlayOneShot(sound, volume);
+                StartCoroutine(DestroySource(newSource, sound.length));
+            }
+            else
+            {
+                AudioSource newSource = gameObject.AddComponent<AudioSource>();
+                newSource.outputAudioMixerGroup = sfxSource.outputAudioMixerGroup;
+                newSource.clip = sound;
+                newSource.loop = true;
+                newSource.Play();
+            }
         }
         else Debug.LogWarning($"SFX clip '{clip}' not found!");
     }
@@ -82,6 +130,22 @@ public class SoundManager : MonoBehaviour
     public void StopMusic()
     {
         musicSource.Stop();
+    }
+
+    public void StopSfx(ClipEnum clip)
+    {
+        if (_sfxDictionary.TryGetValue(clip, out var sound))
+        {
+            AudioSource[] sources = gameObject.GetComponents<AudioSource>();
+            foreach (var source in sources)
+            {
+                if (source.clip == sound)
+                {
+                    source.Stop();
+                    Destroy(source);
+                }
+            }
+        }
     }
 
     IEnumerator DestroySource(AudioSource source, float clipLength)
@@ -93,12 +157,16 @@ public class SoundManager : MonoBehaviour
     public void SetMusicVolume(float volume)
     {
         if(volume < 0.001) volume = 0.001f;
+        PlayerPrefs.SetFloat("musicVolume", volume);
+        PlayerPrefs.Save();
         mixer.SetFloat("MusicVolume", MathF.Log10(volume) * 20f);
     }
 
     public void SetSfxVolume(float volume)
     {
         if(volume < 0.001) volume = 0.001f;
+        PlayerPrefs.SetFloat("sfxVolume", volume);
+        PlayerPrefs.Save();
         mixer.SetFloat("SFXVolume", MathF.Log10(volume) * 20f);
     }
 

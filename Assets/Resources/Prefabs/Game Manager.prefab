@@ -48,4 +48,59 @@ MonoBehaviour:
   jumpForce: 5
   jetpackForce: 15
   rotationSpeed: 10
-  upgrades: []
+  drillableMaterials: []
+  aimSwordRange: 2
+  enemiesInMaxRange: []
+  upgrades:
+  - {fileID: 11400000, guid: a33ecdde77af78344a52228c9925c6ca, type: 2}
+  - {fileID: 11400000, guid: 848dabcb2eccb7a43b89d571ef4dccee, type: 2}
+  - {fileID: 11400000, guid: f29f80a8e30f4ae439bad1ccb2a0cff6, type: 2}
+  - {fileID: 11400000, guid: 25e9630cc3c0f2c44b9f35b31f3e6d9e, type: 2}
+  - {fileID: 11400000, guid: 033dc7a4aa475434cb838f2783015f37, type: 2}
+  - {fileID: 11400000, guid: 50269632c42735d40805a8cbd5ea0cd9, type: 2}
+  - {fileID: 11400000, guid: f129db7327d05cb46a7f8b43f7844242, type: 2}
+  - {fileID: 11400000, guid: b96fcb4b75291c84b9aaefac63d08b72, type: 2}
+  - {fileID: 11400000, guid: b3df6821135459f41b771d2bf8120343, type: 2}
+  - {fileID: 11400000, guid: a89fd82b6d87f4446b0a0737070f75a0, type: 2}
+  - {fileID: 11400000, guid: 8e5d8a7010fc2d6418d4a7587a776c92, type: 2}
+  - {fileID: 11400000, guid: 7b94ab5b881dcaa4ba6c67f6ebafe4d6, type: 2}
+  - {fileID: 11400000, guid: 6f18df9bb945fc2439bdc5e066250e67, type: 2}
+  - {fileID: 11400000, guid: 5bcbe02e91044b848bb56c8a894691b7, type: 2}
+  - {fileID: 11400000, guid: 89eb0a7756dcf6e44b8b08fdf79feba6, type: 2}
+  - {fileID: 11400000, guid: f00385321796a364192e851cfb0922bb, type: 2}
+  - {fileID: 11400000, guid: d36a34a377bdc4046a3eb54652240662, type: 2}
+  - {fileID: 11400000, guid: 97704f5611028aa4fbc8aeb32d6967c9, type: 2}
+  - {fileID: 11400000, guid: 91f401a059f988a4096a8b85f7c6dc26, type: 2}
+  - {fileID: 11400000, guid: 0319669ee99034445813a5d0c9bb8228, type: 2}
+  - {fileID: 11400000, guid: dac5a6245432d374bb5c6d440690cff0, type: 2}
+  - {fileID: 11400000, guid: 792d3b2e42a33e348a584d17fed196fc, type: 2}
+  - {fileID: 11400000, guid: 753d0cd6232977941ac48ffeb1558a83, type: 2}
+  - {fileID: 11400000, guid: 694e5fa2584c9aa4ea81afd5a5b37ac3, type: 2}
+  - {fileID: 11400000, guid: 660b13bbdc5c15840b978cc3121fef27, type: 2}
+  - {fileID: 11400000, guid: 3e8b2899455b12a4c9dbf318c04ff64c, type: 2}
+  - {fileID: 11400000, guid: 2ba521ef65d7c4c4d8689afef1f0918e, type: 2}
+  - {fileID: 11400000, guid: 26b9ef7c0e9c9514cbc76c44b8143b17, type: 2}
+  - {fileID: 11400000, guid: ee639e88f83fb154da1947ce3fd27f1f, type: 2}
+  - {fileID: 11400000, guid: ebcc21f1cf3c53d4585cfc5c9b86d0ef, type: 2}
+  - {fileID: 11400000, guid: dd134daffbb3aab459b5435beacf0702, type: 2}
+  - {fileID: 11400000, guid: 88838dd055ac7b343a3609c1b3a1858d, type: 2}
+  - {fileID: 11400000, guid: 205d2d878be15ef469bda2316ae641a4, type: 2}
+  - {fileID: 11400000, guid: 1ab29fcc17984794fb3a13dc40352bfa, type: 2}
+  - {fileID: 11400000, guid: ff74b0974d47a654bafe8c6ba1500310, type: 2}
+  - {fileID: 11400000, guid: f9be3df834023614db4805e460444c14, type: 2}
+  - {fileID: 11400000, guid: ea501b5d3ebba684d8ff02bb4102bfed, type: 2}
+  - {fileID: 11400000, guid: be22aadebc242b145963d6d2c8ae0e17, type: 2}
+  - {fileID: 11400000, guid: a0bbbf0a69ed127479b156bcb21cc993, type: 2}
+  - {fileID: 11400000, guid: 9f83772ae4bd9b74ab94de76b8ea74ed, type: 2}
+  - {fileID: 11400000, guid: 97c6b0a56a6a9d54abd77834280661dd, type: 2}
+  - {fileID: 11400000, guid: 8d7e65f8f93240e438c88921814f9e81, type: 2}
+  - {fileID: 11400000, guid: 88449415e22285548b5a57063bb7a688, type: 2}
+  - {fileID: 11400000, guid: 850f563180295af46ab9c805c1a355b3, type: 2}
+  - {fileID: 11400000, guid: 790f322fa99a07f4da8d783e0e4ee63d, type: 2}
+  - {fileID: 11400000, guid: 45374ddc9295e0a41b461d3852eb32f0, type: 2}
+  - {fileID: 11400000, guid: 2616dcd1649502440b8c10eaf28e2c7a, type: 2}
+  - {fileID: 11400000, guid: 0681e72253801684e94351ff9f77d260, type: 2}
+  solarSystemRotation: 0
+  solarSystemStarSize: 100
+  lastPlanet: Mercum
+  goodEnding: 0

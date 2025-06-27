@@ -40,6 +40,7 @@ public class SpaceshipController : MonoBehaviour
     private float rotation;
     private float originalTimeToLand = 3f;
     public float TimeToLand;
+    private bool soundPlaing = false;
 
     private void Awake()
     {
@@ -167,7 +168,8 @@ public class SpaceshipController : MonoBehaviour
         rotation += input.x;
         if (input != Vector2.zero || transform.rotation.eulerAngles.y != rotation) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, rotation, 0), Time.deltaTime * turnSpeed);
         Vector2 lookInput = lookAction.ReadValue<Vector2>();
-        if (lookInput != Vector2.zero) cameraController.RotateCamera(lookInput.x);
+        if (lookInput != Vector2.zero && Input.GetMouseButton(1) && lookAction.activeControl != null && lookAction.activeControl.device.name.Contains("Mouse")) cameraController.RotateCamera(lookInput.x * 0.33f);
+        else if (lookInput != Vector2.zero && lookAction.activeControl != null && !lookAction.activeControl.device.name.Contains("Mouse") && !Input.GetMouseButton(1)) cameraController.RotateCamera(lookInput.x);
         if (zoomAction.ReadValue<float>() != 0) cameraController.ZoomCamera(zoomAction.ReadValue<float>() * 0.1f);
         if (nearPlanet != "")
         {
@@ -185,6 +187,16 @@ public class SpaceshipController : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             return;
         }
+        if ((accelerateSpaceshipAction.ReadValue<float>() > 0 || decelerateSpaceshipAction.ReadValue<float>() > 0) && !soundPlaing)
+        {
+            soundPlaing = true;
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.SpaceShipEngine, true);
+        }
+        else if (accelerateSpaceshipAction.ReadValue<float>() <= 0 && decelerateSpaceshipAction.ReadValue<float>() <= 0 && soundPlaing)
+        {
+            soundPlaing = false;
+            SoundManager.instance.StopSfx(SoundManager.ClipEnum.SpaceShipEngine);
+        }
         rb.AddForce(transform.forward * accelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration * 5, ForceMode.Acceleration);
         rb.AddForce(transform.forward * -decelerateSpaceshipAction.ReadValue<float>() * GameManager.instance.SpaceShipAcceleration * 5, ForceMode.Acceleration);
         if (rb.linearVelocity.magnitude > GameManager.instance.MaxSpaceshipSpeed) rb.linearVelocity = rb.linearVelocity.normalized * GameManager.instance.MaxSpaceshipSpeed;
@@ -194,6 +206,7 @@ public class SpaceshipController : MonoBehaviour
     {
         if (nearPlanet != "")
         {
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.LoadingBar);
             if (landingCoroutine != null) StopCoroutine(landingCoroutine);
             landingCoroutine = StartCoroutine(LandOnPlanet());
         }
@@ -282,7 +295,7 @@ public class SpaceshipController : MonoBehaviour
         if (TimeToLand <= 0 && nearPlanet != "" && nearPlanet != "" && Array.IndexOf(planets, nearPlanet) <= GameManager.instance.LandingGearTier) HUDManager.instance.FadeOut(nearPlanet);
         else if (TimeToLand <= 0 && nearPlanet != "" && Array.IndexOf(planets, nearPlanet) > GameManager.instance.LandingGearTier)
         {
-            //TODO
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Prohibited, false, 2);
         }
         else if (TimeToLand <= 0 && nearPlanet == "Scape")
         {

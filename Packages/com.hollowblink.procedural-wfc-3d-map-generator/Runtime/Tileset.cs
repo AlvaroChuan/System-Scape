@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     public class Tileset : ScriptableObject
@@ -12,3 +13,4 @@ namespace WFC3DMapGenerator
         [SerializeField] public List<string> socketTypes = new List<string>();
     }
 }
+#endif

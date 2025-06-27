@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 using System;
 using Cell3DStruct = WFC3DMapGenerator.WFCStructs.Cell3DStruct;
 using Tile3DStruct = WFC3DMapGenerator.WFCStructs.Tile3DStruct;
-using UnityEngine.Rendering;
 
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     [ExecuteInEditMode]
@@ -75,6 +76,9 @@ namespace WFC3DMapGenerator
         /// <summary>
         /// Generates the map
         /// </summary>
+        /// <summary>
+        /// Generates the map
+        /// </summary>
         unsafe void Generate()
         {
             ClearNeighbours(ref tileObjects);
@@ -112,44 +116,57 @@ namespace WFC3DMapGenerator
             // Generate each layer of the map starting from the bottom
             void DispatchMap(int layer)
             {
-                // Loop until the grid is fully collapsed without any incomatibilities
-                if (stopGeneration)
-                {
-                    finished = true;
-                    ReleaseMemory();
-                    ClearGeneration();
-                    return;
-                }
-                int[] incompatibilities = { 0 };
-                Vector3[] offsets = { new Vector3(0, layer, 0), new Vector3(2, layer, 0), new Vector3(0, layer, 2), new Vector3(2, layer, 2) };
+                DispatchLayer();
+
                 void DispatchLayer()
                 {
+                    Debug.Log("Dispatching layer " + layer);
+                    // Loop until the grid is fully collapsed without any incomatibilities
+                    if (stopGeneration)
+                    {
+                        finished = true;
+                        ReleaseMemory();
+                        ClearHierarchy();
+                        return;
+                    }
+
+                    Vector3[] offsets = { new Vector3(0, layer, 0), new Vector3(2, layer, 0), new Vector3(0, layer, 2), new Vector3(2, layer, 2) };
                     outputBuffer.SetData(gridComponentsStructs);
                     stateBuffer.SetData(new int[] { 0 });
+
                     foreach (Vector3 offset in offsets)
                     {
                         shader.SetInt("seed", UnityEngine.Random.Range(0, int.MaxValue));
                         shader.SetVector("offset", offset);
                         shader.Dispatch(shader.FindKernel("CSMain"), Mathf.CeilToInt((float)dimensionsX / 10), 1, Mathf.CeilToInt((float)dimensionsZ / 10));
                     }
-                    AsyncGPUReadback.Request(outputBuffer, (request) =>
+
+                    int[] incompatibilities = new int[1];
+                    stateBuffer.GetData(incompatibilities);
+
+                    if (incompatibilities[0] == 0 & layer > 0 & layer < dimensionsY - 1)
                     {
-                        incompatibilities = request.GetData<int>().ToArray();
-                        if (incompatibilities[0] != 0) DispatchLayer();
-                        else if (layer < dimensionsY - 1)
-                        {
-                            outputBuffer.GetData(gridComponentsStructs);
-                            DispatchMap(layer++);
-                        }
-                        else
-                        {
-                            finished = true;
-                            outputBuffer.GetData(gridComponentsStructs);
-                            InstantiateChunk();
-                            ClearHierarchy();
-                            ReleaseMemory();
-                        }
-                    });
+                        Debug.Log("Layer " + layer + " finished, dispatching next layer");
+                        layer++;
+                        stateBuffer.SetData(new int[1] { 0 });
+                        outputBuffer.GetData(gridComponentsStructs);
+                        AsyncGPUReadback.Request(outputBuffer, _ => DispatchLayer());
+                    }
+                    else if (incompatibilities[0] != 0)
+                    {
+                        Debug.Log("Generation finished with incompatibilities" + incompatibilities[0]);
+                        stateBuffer.SetData(new int[1] { 0 });
+                        outputBuffer.SetData(gridComponentsStructs);
+                        AsyncGPUReadback.Request(outputBuffer, _ => DispatchLayer());
+                    }
+                    else
+                    {
+                        Debug.Log("Generation finished without incompatibilities");
+                        outputBuffer.GetData(gridComponentsStructs);
+                        InstantiateChunk();
+                        ClearGeneration();
+                        ReleaseMemory();
+                    }
                 }
             }
         }
@@ -175,7 +192,7 @@ namespace WFC3DMapGenerator
                     cell.RecreateCell(tileObjects[gridComponentsStructs[i].tileOptions[0]]);
                     if (cell.transform.childCount != 0)
                     {
-                        for(int j = cell.transform.childCount; i >= 0; j--)
+                        for (int j = cell.transform.childCount; i >= 0; j--)
                         {
                             Transform child = cell.transform.GetChild(j);
                             DestroyImmediate(child.gameObject);
@@ -203,7 +220,7 @@ namespace WFC3DMapGenerator
                 Transform child = gameObject.transform.GetChild(i);
                 if (child.childCount != 0)
                 {
-                    if(child.gameObject.name.Contains("Cell"))
+                    if (child.gameObject.name.Contains("Cell"))
                     {
                         child.GetChild(0).parent = gameObject.transform;
                         trash.Add(child.gameObject);
@@ -283,20 +300,6 @@ namespace WFC3DMapGenerator
             tileRotated.tileType = tile.tileType;
             tileRotated.probability = tile.probability;
             tileRotated.positionOffset = tile.positionOffset;
-
-            foreach(Component component in tile.gameObject.GetComponents<Component>())
-            {
-                if (component is Tile3D || component is MeshFilter || component is MeshRenderer || component is Transform) continue;
-                Component newComponent = newTile.AddComponent(component.GetType());
-                UnityEditor.EditorUtility.CopySerialized(component, newComponent);
-            }
-
-            for(int i = 0; i < tile.gameObject.transform.childCount; i++)
-            {
-                Transform child = tile.gameObject.transform.GetChild(i);
-                if (child == tile.gameObject) continue;
-                GameObject newChild = Instantiate(child.gameObject, newTile.transform);
-            }
 
             return tileRotated;
         }
@@ -650,3 +653,4 @@ namespace WFC3DMapGenerator
         }
     }
 }
+#endif

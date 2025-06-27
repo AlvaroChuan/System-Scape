@@ -106,6 +106,29 @@ public class HUDManager : MonoBehaviour
                 ToggleHUD(false, "Upgrades");
                 ToggleHUD(true, "Main Menu");
             }
+
+            if (PlayerPrefs.HasKey("musicVolume"))
+            {
+                musicSlider2.value = PlayerPrefs.GetFloat("musicVolume");
+                musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
+            }
+            else
+            {
+                musicSlider2.value = 1f;
+                musicSlider.value = 1f;
+            }
+
+            if (PlayerPrefs.HasKey("sfxVolume"))
+            {
+                sfxSlider2.value = PlayerPrefs.GetFloat("sfxVolume");
+                sfxSlider.value = PlayerPrefs.GetFloat("sfxVolume");
+            }
+            else
+            {
+                sfxSlider2.value = 1f;
+                sfxSlider.value = 1f;
+            }
+
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -184,13 +207,59 @@ public class HUDManager : MonoBehaviour
                 break;
             case "Pause":
                 PauseHUD.SetActive(state);
-                if (state) musicSlider.value = SoundManager.instance.GetMusicVolume();
-                if (state) sfxSlider.value = SoundManager.instance.GetSFXVolume();
-                if (state) EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+                if (state)
+                {
+                    EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+                    if (PlayerPrefs.HasKey("musicVolume"))
+                    {
+                        musicSlider2.value = PlayerPrefs.GetFloat("musicVolume");
+                        musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
+                    }
+                    else
+                    {
+                        musicSlider2.value = 1f;
+                        musicSlider.value = 1f;
+                    }
+
+                    if (PlayerPrefs.HasKey("sfxVolume"))
+                    {
+                        sfxSlider2.value = PlayerPrefs.GetFloat("sfxVolume");
+                        sfxSlider.value = PlayerPrefs.GetFloat("sfxVolume");
+                    }
+                    else
+                    {
+                        sfxSlider2.value = 1f;
+                        sfxSlider.value = 1f;
+                    }
+                }
                 break;
             case "Main Menu":
                 MainMenuHUD.SetActive(state);
-                if (state) EventSystem.current.SetSelectedGameObject(playButton.gameObject);
+                if (state)
+                {
+                    EventSystem.current.SetSelectedGameObject(playButton.gameObject);
+                    if (PlayerPrefs.HasKey("musicVolume"))
+                    {
+                        musicSlider2.value = PlayerPrefs.GetFloat("musicVolume");
+                        musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
+                    }
+                    else
+                    {
+                        musicSlider2.value = 1f;
+                        musicSlider.value = 1f;
+                    }
+
+                    if (PlayerPrefs.HasKey("sfxVolume"))
+                    {
+                        sfxSlider2.value = PlayerPrefs.GetFloat("sfxVolume");
+                        sfxSlider.value = PlayerPrefs.GetFloat("sfxVolume");
+                    }
+                    else
+                    {
+                        sfxSlider2.value = 1f;
+                        sfxSlider.value = 1f;
+                    }
+                }
                 break;
             case "Ending":
                 endingHUD.SetActive(state);
@@ -217,6 +286,7 @@ public class HUDManager : MonoBehaviour
 
     public void ToggleUpgradesPanel(GameObject panel)
     {
+        if(SoundManager.instance != null) SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         GameObject[] panelList = new GameObject[] { statsPanel, equipmentPanel, spaceshipPanel, gadgetsPanel };
         Button[] buttonList = new Button[] { statsButton, equipmentButton, spaceshipButton, gadgetsButton };
         foreach (GameObject go in panelList) go.SetActive(go == panel);
@@ -249,6 +319,7 @@ public class HUDManager : MonoBehaviour
 
     public void NextUpgradesSubPanel()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         if (currentPanel == null) return;
         List<GameObject> panelList = new List<GameObject>();
         currentSubPanelIndex++;
@@ -260,6 +331,7 @@ public class HUDManager : MonoBehaviour
 
     public void PreviousUpgradesSubPanel()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         if (currentPanel == null) return;
         List<GameObject> panelList = new List<GameObject>();
         currentSubPanelIndex--;
@@ -277,10 +349,13 @@ public class HUDManager : MonoBehaviour
         else if (result == 1) Debug.Log("Upgrade already purchased: " + upgrade.upgradeName);
         else if (result == 2) Debug.Log("Prerequisites not met");
         else if (result == 3) Debug.Log("Not enough resources to purchase upgrade: " + upgrade.upgradeName);
+        if(result == 0) SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Upgrade, false, 2f);
+        else SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Prohibited, false, 2f);
     }
 
     public void BackToMainMenu()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         GameManager.instance.EndRun(3);
     }
 
@@ -293,6 +368,7 @@ public class HUDManager : MonoBehaviour
 
     public void OpenOptionsPanel()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         pausePanel.SetActive(false);
         settingsPanel.SetActive(true);
         tabText.text = "Options";
@@ -301,15 +377,15 @@ public class HUDManager : MonoBehaviour
 
     public void OpenOptionsPanelFromMainMenu()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         optionsPanel.SetActive(true);
         mainMenuPanel.SetActive(false);
-        musicSlider2.value = SoundManager.instance.GetMusicVolume();
-        sfxSlider2.value = SoundManager.instance.GetSFXVolume();
         EventSystem.current.SetSelectedGameObject(backButton1.gameObject);
     }
 
     public void CloseOptionsPanel()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         pausePanel.SetActive(true);
         settingsPanel.SetActive(false);
         tabText.text = "Pause Menu";
@@ -318,6 +394,7 @@ public class HUDManager : MonoBehaviour
 
     public void CloseOptionsPanelFromMainMenu()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         optionsPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         EventSystem.current.SetSelectedGameObject(playButton.gameObject);
@@ -325,6 +402,8 @@ public class HUDManager : MonoBehaviour
 
     public void OpenPad()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.OpenPad);
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.CRT, true);
         if (SceneManager.GetActiveScene().name != "Space") PlayerController.instance.OpenPad("Ending");
         else SpaceshipController.instance.OpenPad("Ending");
         ToggleHUD(true, "Ending");
@@ -333,28 +412,42 @@ public class HUDManager : MonoBehaviour
 
     public void ClosePad()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.ClosePad);
+        SoundManager.instance.StopSfx(SoundManager.ClipEnum.CRT);
         ToggleHUD(false, "Pause");
         if (SceneManager.GetActiveScene().name != "Space") PlayerController.instance.ClosePad("Pause");
         else SpaceshipController.instance.ClosePad("Pause");
     }
 
-    public void SetMusicVolume(float volume)
+    public void SetMusicVolume1()
     {
-        SoundManager.instance.SetMusicVolume(volume);
+        if(SoundManager.instance != null) SoundManager.instance.SetMusicVolume(musicSlider.value);
     }
 
-    public void SetSFXVolume(float volume)
+    public void SetSFXVolume1()
     {
-        SoundManager.instance.SetSfxVolume(volume);
+        if(SoundManager.instance != null) SoundManager.instance.SetSfxVolume(sfxSlider.value);
+    }
+
+    public void SetMusicVolume2()
+    {
+        if(SoundManager.instance != null) SoundManager.instance.SetMusicVolume(musicSlider2.value);
+    }
+
+    public void SetSFXVolume2()
+    {
+        if(SoundManager.instance != null) SoundManager.instance.SetSfxVolume(sfxSlider2.value);
     }
 
     public void Quit()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         GameManager.instance.QuitGame();
     }
 
     public void NextStoryPanel(GameObject nextPanel)
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Interface);
         GameObject[] panels = new GameObject[] { storyPanel, controlsPanel, storyPanel2, mainMenuPanel };
         Button[] nextButtons = new Button[] { nextButton1, nextButton2, nextButton3 };
         foreach (GameObject panel in panels) panel.SetActive(false);
@@ -377,12 +470,14 @@ public class HUDManager : MonoBehaviour
 
     public void FadeOut(string sceneName)
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.FadeOut);
         nextSceneName = sceneName;
         fadeAnimator.SetTrigger("FadeOut");
     }
 
     public void FadeIn()
     {
+        SoundManager.instance.PlaySfx(SoundManager.ClipEnum.FadeIn);
         fadeAnimator.SetTrigger("FadeIn");
     }
 

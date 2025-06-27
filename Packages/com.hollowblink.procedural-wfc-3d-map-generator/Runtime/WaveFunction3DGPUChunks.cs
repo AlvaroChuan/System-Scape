@@ -7,6 +7,7 @@ using UnityEngine.Rendering;
 using Tile3DStruct = WFC3DMapGenerator.WFCStructs.Tile3DStruct;
 using Cell3DStruct = WFC3DMapGenerator.WFCStructs.Cell3DStruct;
 
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     [ExecuteInEditMode]
@@ -79,7 +80,7 @@ namespace WFC3DMapGenerator
         public int GetProgress()
         {
             if (chunkOffsets == null || chunkOffsets.Count == 0) return 0;
-            return (int) ((float) actualChunk / (float) (chunkOffsets.Count - 1) * 100f);
+            return (int)((float)actualChunk / (float)(chunkOffsets.Count - 1) * 100f);
         }
 
         /// <summary>
@@ -274,7 +275,7 @@ namespace WFC3DMapGenerator
                         cell.RecreateCell(tileObjects[output.Item1[i].tileOptions[0]]);
                         if (cell.transform.childCount != 0)
                         {
-                            for(int j = cell.transform.childCount - 1; j >= 0; j--)
+                            for (int j = cell.transform.childCount - 1; j >= 0; j--)
                             {
                                 Transform child = cell.transform.GetChild(j);
                                 DestroyImmediate(child.gameObject);
@@ -334,7 +335,7 @@ namespace WFC3DMapGenerator
                     Transform child = chunk.GetChild(i);
                     if (child.childCount != 0)
                     {
-                        if(child.gameObject.name.Contains("Cell"))
+                        if (child.gameObject.name.Contains("Cell"))
                         {
                             child.GetChild(0).parent = chunk;
                             trash.Add(child.gameObject);
@@ -370,7 +371,7 @@ namespace WFC3DMapGenerator
         /// </summary>
         private void ClearHierarchy()
         {
-            for(int i = gameObject.transform.childCount - 1; i >= 0; i--)
+            for (int i = gameObject.transform.childCount - 1; i >= 0; i--)
             {
                 Transform child = gameObject.transform.GetChild(i);
                 DestroyImmediate(child.gameObject);
@@ -428,14 +429,14 @@ namespace WFC3DMapGenerator
             tileRotated.probability = tile.probability;
             tileRotated.positionOffset = tile.positionOffset;
 
-            foreach(Component component in tile.gameObject.GetComponents<Component>())
+            foreach (Component component in tile.gameObject.GetComponents<Component>())
             {
                 if (component is Tile3D || component is MeshFilter || component is MeshRenderer || component is Transform) continue;
                 Component newComponent = newTile.AddComponent(component.GetType());
                 UnityEditor.EditorUtility.CopySerialized(component, newComponent);
             }
 
-            for(int i = 0; i < tile.gameObject.transform.childCount; i++)
+            for (int i = 0; i < tile.gameObject.transform.childCount; i++)
             {
                 Transform child = tile.gameObject.transform.GetChild(i);
                 if (child == tile.gameObject) continue;
@@ -792,3 +793,4 @@ namespace WFC3DMapGenerator
         }
     }
 }
+#endif

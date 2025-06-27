@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -167,16 +166,16 @@ public class GameManager : MonoBehaviour
         damageReduction = 0f;
         reflectionChance = 0f;
 
-        iron = 10000;
-        copper = 10000;
-        magnetite = 10000;
-        quartz = 10000;
-        phobosite = 10000;
-        radium = 10000;
-        glaciate = 10000;
-        bismuth = 10000;
-        platinum = 10000;
-        petralact = 10000;
+        iron = 0;
+        copper = 0;
+        magnetite = 0;
+        quartz = 0;
+        phobosite = 0;
+        radium = 0;
+        glaciate = 0;
+        bismuth = 0;
+        platinum = 0;
+        petralact = 0;
         maxAmmountPerMaterial = 110;
 
         maxSpaceshipSpeed = 10f;
@@ -229,6 +228,7 @@ public class GameManager : MonoBehaviour
             case 3: // Player quit
                 goodEnding = false;
                 HUDManager.instance.FadeOut("Main Menu");
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.MainTheme);
                 break;
             case 4: // Player completed the game
                 goodEnding = true;
@@ -439,7 +439,8 @@ public class GameManager : MonoBehaviour
 
     public void DamagePlayer(int damage)
     {
-        if(SceneManager.GetActiveScene().name != "Space") PlayerController.instance.Damage();
+        Debug.Log($"Player took {damage} damage. Current HP: {currentHP}");
+        if (SceneManager.GetActiveScene().name != "Space") PlayerController.instance.Damage();
         if (Random.Range(0, 1f) < reflectionChance) return; // Reflect damage if chance is met
         currentHP -= Mathf.Max(0, damage - (int)(damage * damageReduction)); // Apply damage reduction
         if (currentHP <= 0) EndRun(1);
@@ -450,45 +451,72 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void EnemyDeath()
+    {
+        currentHP = Mathf.Min(currentHP + healthPerKill, maxHP);
+        currentOxygen = Mathf.Min(currentOxygen + oxygenPerKill, maxOxygen);
+    }
+
     public void AddMaterial(string materialName)
     {
         switch (materialName)
         {
             case "Iron":
-                if (iron < maxAmmountPerMaterial) iron+=10;
+                if (iron < maxAmmountPerMaterial) iron += 10;
                 break;
             case "Copper":
-                if (copper < maxAmmountPerMaterial) copper+=10;
+                if (copper < maxAmmountPerMaterial) copper += 10;
                 break;
             case "Magnetite":
-                if (magnetite < maxAmmountPerMaterial) magnetite+=10;
+                if (magnetite < maxAmmountPerMaterial) magnetite += 10;
                 break;
             case "Quartz":
-                if (quartz < maxAmmountPerMaterial) quartz+=10;
+                if (quartz < maxAmmountPerMaterial) quartz += 10;
                 break;
             case "Phobosite":
-                if (phobosite < maxAmmountPerMaterial) phobosite+=10;
+                if (phobosite < maxAmmountPerMaterial) phobosite += 10;
                 break;
             case "Radium":
-                if (radium < maxAmmountPerMaterial) radium+=10;
+                if (radium < maxAmmountPerMaterial) radium += 10;
                 break;
             case "Glaciate":
-                if (glaciate < maxAmmountPerMaterial) glaciate+=10;
+                if (glaciate < maxAmmountPerMaterial) glaciate += 10;
                 break;
             case "Bismuth":
-                if (bismuth < maxAmmountPerMaterial) bismuth+=10;
+                if (bismuth < maxAmmountPerMaterial) bismuth += 10;
                 break;
             case "Platinum":
-                if (platinum < maxAmmountPerMaterial) platinum+=10;
+                if (platinum < maxAmmountPerMaterial) platinum += 10;
                 break;
             case "Petralact":
-                if (petralact < maxAmmountPerMaterial) petralact+=10;
+                if (petralact < maxAmmountPerMaterial) petralact += 10;
                 break;
         }
     }
 
     public void LoadScene(string sceneName)
     {
+        switch (sceneName)
+        {
+            case "Mercum":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.MercumTheme, true, 0.5f);
+                break;
+            case "Colis":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.ColisTheme, true, 0.75f);
+                break;
+            case "Phobos":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.PhobosTheme, true, 0.5f);
+                break;
+            case "Regio":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.RegioTheme, true, 1f);
+                break;
+            case "Platum":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.PlatumTheme, true, 0.5f);
+                break;
+            case "Space":
+                SoundManager.instance.PlayMusic(SoundManager.ClipEnum.SpaceTheme, true, 1f);
+                break;
+        }
         SceneManager.LoadScene(sceneName);
         HUDManager.instance.FadeIn();
         if (sceneName == "Main Menu") HUDManager.instance.SetMainMenu();
@@ -504,7 +532,7 @@ public class GameManager : MonoBehaviour
     {
         if (landingGearTier < 5)
         {
-            //TODO:
+            SoundManager.instance.PlaySfx(SoundManager.ClipEnum.Prohibited, false, 2f);
         }
         else
         {
@@ -536,14 +564,14 @@ public class GameManager : MonoBehaviour
     {
         while (true)
         {
-            solarSystemRotation += Time.fixedDeltaTime * 0.25f;
+            solarSystemRotation += Time.deltaTime * 0.25f;
             if (solarSystemRotation >= 360f) solarSystemRotation -= 360f;
-            solarSystemStarSize += Time.fixedDeltaTime * 0.25f;
-            if (SceneManager.GetActiveScene().name == "Mercum" && solarSystemStarSize > 200) EndRun(0);
-            else if (SceneManager.GetActiveScene().name == "Colis" && solarSystemStarSize > 400) EndRun(3);
-            else if (SceneManager.GetActiveScene().name == "Phobos" && solarSystemStarSize > 600) EndRun(3);
-            else if (SceneManager.GetActiveScene().name == "Regio" && solarSystemStarSize > 800) EndRun(3);
-            else if (SceneManager.GetActiveScene().name == "Platum" && solarSystemStarSize > 1000) EndRun(3);
+            solarSystemStarSize += Time.deltaTime * 0.25f;
+            if (SceneManager.GetActiveScene().name == "Mercum" && solarSystemStarSize > 450) EndRun(0);
+            else if (SceneManager.GetActiveScene().name == "Colis" && solarSystemStarSize > 850) EndRun(0);
+            else if (SceneManager.GetActiveScene().name == "Phobos" && solarSystemStarSize > 1250) EndRun(0);
+            else if (SceneManager.GetActiveScene().name == "Regio" && solarSystemStarSize > 1650) EndRun(0);
+            else if (SceneManager.GetActiveScene().name == "Platum" && solarSystemStarSize > 2050) EndRun(0);
             yield return null;
         }
     }

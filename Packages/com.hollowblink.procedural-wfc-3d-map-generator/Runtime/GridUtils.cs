@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Cell3DStruct = WFC3DMapGenerator.WFCStructs.Cell3DStruct;
-
+#if UNITY_EDITOR
 namespace WFC3DMapGenerator
 {
     public class GridUtils : MonoBehaviour
@@ -76,3 +76,4 @@ namespace WFC3DMapGenerator
         }
     }
 }
+#endif
